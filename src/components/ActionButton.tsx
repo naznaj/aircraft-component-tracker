@@ -8,15 +8,15 @@ import { Button } from "@/components/ui/button";
 interface ActionButtonProps {
   request: RobbingRequest;
   onAction: (action: string, formData?: any) => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'link' | 'destructive';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
 export function ActionButton({ 
   request, 
   onAction, 
-  variant = 'primary',
-  size = 'md'
+  variant = 'default',
+  size = 'default'
 }: ActionButtonProps) {
   const { canChangeStatus, getAvailableStatusTransitions } = useRobbing();
   const [isOpen, setIsOpen] = useState(false);
@@ -26,28 +26,6 @@ export function ActionButton({
   if (availableTransitions.length === 0) {
     return null;
   }
-  
-  const getButtonClass = () => {
-    const baseClass = 'font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary';
-    const sizeClass = {
-      sm: 'px-2.5 py-1.5 text-xs',
-      md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base'
-    }[size];
-    
-    switch (variant) {
-      case 'primary':
-        return `${baseClass} ${sizeClass} bg-primary text-white hover:bg-primary/90`;
-      case 'secondary':
-        return `${baseClass} ${sizeClass} bg-secondary text-secondary-foreground hover:bg-secondary/80`;
-      case 'outline':
-        return `${baseClass} ${sizeClass} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50`;
-      case 'ghost':
-        return `${baseClass} ${sizeClass} text-gray-700 hover:bg-gray-100`;
-      default:
-        return `${baseClass} ${sizeClass} bg-primary text-white hover:bg-primary/90`;
-    }
-  };
   
   // For Initiated status, show "Validate C of A" button for CAMO Planning
   if (request.status === 'Initiated') {
