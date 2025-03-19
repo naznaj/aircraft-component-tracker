@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { RobbingRequest, StatusHistoryEntry, UserRole } from '../types';
 import { formatDateTime, formatRelativeTime, getStatusBadgeClass } from '../utils/formatters';
@@ -7,6 +6,7 @@ import { StatusBadge } from './StatusBadge';
 import { DocumentUploader } from './DocumentUploader';
 import { useAuth } from '../context/AuthContext';
 import { useRobbing } from '../context/RobbingContext';
+import { getAllStatuses } from '../utils/statusTransitions';
 
 interface DetailPanelProps {
   request: RobbingRequest;
@@ -61,6 +61,24 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
   };
   
   const statusActions = getAvailableStatusTransitions(request);
+  
+  const organizeStatusHistory = () => {
+    const statusMap = new Map<string, StatusHistoryEntry>();
+    
+    request.statusHistory.forEach(entry => {
+      statusMap.set(entry.status, entry);
+    });
+    
+    const orderedStatuses = getAllStatuses();
+    
+    const presentStatuses = orderedStatuses.filter(status => 
+      request.statusHistory.some(entry => entry.status === status)
+    );
+    
+    return presentStatuses.map(status => statusMap.get(status)).filter(Boolean) as StatusHistoryEntry[];
+  };
+  
+  const organizedHistory = organizeStatusHistory();
   
   const renderActionControls = () => {
     if (statusActions.length === 0) return null;
@@ -166,7 +184,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
               <div className="mt-8">
                 <div className="flow-root">
                   <div className="space-y-6">
-                    {/* Header Info */}
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900">{request.requestId}</h3>
@@ -177,9 +194,7 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                       <StatusBadge status={request.status} size="lg" />
                     </div>
                     
-                    {/* Collapsible Sections */}
                     <div className="space-y-4">
-                      {/* General Information */}
                       <div className="border rounded-md overflow-hidden">
                         <button
                           className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100"
@@ -218,7 +233,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         )}
                       </div>
                       
-                      {/* Aircraft Information */}
                       <div className="border rounded-md overflow-hidden">
                         <button
                           className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100"
@@ -255,7 +269,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         )}
                       </div>
                       
-                      {/* Component Information */}
                       <div className="border rounded-md overflow-hidden">
                         <button
                           className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100"
@@ -298,7 +311,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         )}
                       </div>
                       
-                      {/* Documentation */}
                       <div className="border rounded-md overflow-hidden">
                         <button
                           className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100"
@@ -359,7 +371,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         )}
                       </div>
                       
-                      {/* Normalization */}
                       {(request.status === 'Normalization Planned' || request.status === 'Normalized') && (
                         <div className="border rounded-md overflow-hidden">
                           <button
@@ -412,7 +423,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         </div>
                       )}
                       
-                      {/* Status History */}
                       <div className="border rounded-md overflow-hidden">
                         <button
                           className="w-full px-4 py-3 flex justify-between items-center bg-gray-50 hover:bg-gray-100"
@@ -428,37 +438,64 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         
                         {isExpanded('history') && (
                           <div className="px-4 py-3">
-                            <ul className="space-y-4">
-                              {request.statusHistory.map((entry: StatusHistoryEntry, index: number) => (
-                                <li key={index} className="relative pb-4">
-                                  {index !== request.statusHistory.length - 1 && (
-                                    <span className="absolute top-5 left-2.5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                                  )}
-                                  <div className="relative flex items-start space-x-3">
-                                    <div>
-                                      <div className={`relative px-1 ${getStatusBadgeClass(entry.status)} h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-white`}>
-                                        <Info className="h-3 w-3" aria-hidden="true" />
-                                      </div>
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div>
-                                        <div className="text-sm">
-                                          <span className="font-medium text-gray-900">{entry.status}</span>
-                                        </div>
-                                        <p className="mt-0.5 text-xs text-gray-500">
-                                          {formatDateTime(entry.timestamp)} by {entry.user} ({entry.role})
-                                        </p>
-                                      </div>
-                                      {entry.comments && (
-                                        <div className="mt-2 text-sm text-gray-700">
-                                          <p>{entry.comments}</p>
-                                        </div>
+                            <div className="relative">
+                              <div className="absolute left-2.5 top-0 h-full w-0.5 bg-gray-200"></div>
+                              
+                              <ul className="relative space-y-4">
+                                {organizedHistory.map((entry, index) => {
+                                  const isFirstBranched = index > 0 && entry.status === 'Awaiting FTAM Approval';
+                                  const isBranchResolved = entry.status === 'Pending SDS' && index > 1;
+                                  
+                                  let branchStyle = '';
+                                  let connectorStyle = '';
+                                  
+                                  if (isFirstBranched) {
+                                    branchStyle = 'ml-6';
+                                    connectorStyle = 'absolute -left-6 top-2.5 h-0.5 w-6 bg-gray-200';
+                                  } else if (isBranchResolved) {
+                                    connectorStyle = 'absolute -left-6 top-2.5 h-0.5 w-6 bg-gray-200 -ml-6';
+                                  }
+                                  
+                                  return (
+                                    <li key={index} className={`relative pb-4 ${branchStyle}`}>
+                                      {index !== organizedHistory.length - 1 && !isBranchResolved && (
+                                        <span 
+                                          className="absolute top-5 left-2.5 -ml-px h-full w-0.5 bg-gray-200" 
+                                          aria-hidden="true"
+                                        ></span>
                                       )}
-                                    </div>
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
+                                      
+                                      {(isFirstBranched || isBranchResolved) && (
+                                        <span className={connectorStyle} aria-hidden="true"></span>
+                                      )}
+                                      
+                                      <div className="relative flex items-start space-x-3">
+                                        <div>
+                                          <div className={`relative px-1 ${getStatusBadgeClass(entry.status)} h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-white`}>
+                                            <Info className="h-3 w-3" aria-hidden="true" />
+                                          </div>
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <div>
+                                            <div className="text-sm">
+                                              <span className="font-medium text-gray-900">{entry.status}</span>
+                                            </div>
+                                            <p className="mt-0.5 text-xs text-gray-500">
+                                              {formatDateTime(entry.timestamp)} by {entry.user} ({entry.role})
+                                            </p>
+                                          </div>
+                                          {entry.comments && (
+                                            <div className="mt-2 text-sm text-gray-700">
+                                              <p>{entry.comments}</p>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
                           </div>
                         )}
                       </div>
