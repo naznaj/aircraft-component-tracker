@@ -1,30 +1,35 @@
-
 import { useState, useRef } from 'react';
 import { Upload, X, FileText, Check } from 'lucide-react';
 import { formatFileSize } from '../utils/formatters';
 
 interface DocumentUploaderProps {
-  label: string;
+  id?: string; // Make id optional
+  label?: string; // Make label optional
   accept?: string;
   maxSize?: number;
   referenceField?: boolean;
   referenceValue?: string;
   onReferenceChange?: (value: string) => void;
-  onFileChange: (file: File | null) => void;
+  onFileChange?: (file: File | null) => void;
+  onChange?: (file: File | null) => void; // Add this for backward compatibility
+  value?: File | null; // Add this to handle the value prop
   description?: string;
 }
 
 export function DocumentUploader({
-  label,
+  id,
+  label = 'Upload Document', // Default label if not provided
   accept = '.pdf,.jpg,.jpeg,.png',
   maxSize = 5 * 1024 * 1024, // 5MB default
   referenceField = false,
   referenceValue = '',
   onReferenceChange,
   onFileChange,
+  onChange,
+  value,
   description
 }: DocumentUploaderProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(value || null);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +44,8 @@ export function DocumentUploader({
     
     if (!selectedFile) {
       setFile(null);
-      onFileChange(null);
+      if (onFileChange) onFileChange(null);
+      if (onChange) onChange(null);
       return;
     }
     
@@ -69,7 +75,8 @@ export function DocumentUploader({
     }
     
     setFile(selectedFile);
-    onFileChange(selectedFile);
+    if (onFileChange) onFileChange(selectedFile);
+    if (onChange) onChange(selectedFile);
   };
   
   const handleDragOver = (event: React.DragEvent) => {
@@ -92,7 +99,8 @@ export function DocumentUploader({
   const handleRemoveFile = () => {
     setFile(null);
     setError(null);
-    onFileChange(null);
+    if (onFileChange) onFileChange(null);
+    if (onChange) onChange(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -172,6 +180,7 @@ export function DocumentUploader({
         )}
         <input
           ref={fileInputRef}
+          id={id}
           type="file"
           className="hidden"
           accept={accept}

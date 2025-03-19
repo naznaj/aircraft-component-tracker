@@ -130,6 +130,10 @@ export function getStatusTransitions(currentStatus: RobbingStatus): StatusTransi
   return statusTransitionMap[currentStatus];
 }
 
+export function getStatusDescription(status: RobbingStatus): string {
+  return statusTransitionMap[status].description;
+}
+
 export function getAllStatuses(): RobbingStatus[] {
   // Return statuses in the order of the workflow
   return [

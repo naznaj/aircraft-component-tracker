@@ -1,11 +1,9 @@
-
 import { useState } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RobbingRequest } from '@/types';
 import { DocumentUploader } from '../DocumentUploader';
 import { useRobbing } from '@/context/RobbingContext';
@@ -154,7 +152,6 @@ export function SDSSubmissionDrawer({ isOpen, onClose, request }: SDSSubmissionD
     );
   };
   
-  // Render the correct step content
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -274,27 +271,27 @@ export function SDSSubmissionDrawer({ isOpen, onClose, request }: SDSSubmissionD
               
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="sdsDoc">SDS Document</Label>
+                  <Label>SDS Document</Label>
                   <DocumentUploader 
-                    id="sdsDoc"
+                    label="SDS Document"
                     value={documents.sdsDocument}
                     onChange={(file) => setDocuments({...documents, sdsDocument: file})}
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="arDoc">Acceptance Report</Label>
+                  <Label>Acceptance Report</Label>
                   <DocumentUploader 
-                    id="arDoc"
+                    label="Acceptance Report"
                     value={documents.acceptanceReportDocument}
                     onChange={(file) => setDocuments({...documents, acceptanceReportDocument: file})}
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="slDoc">S Label Document</Label>
+                  <Label>S Label Document</Label>
                   <DocumentUploader 
-                    id="slDoc"
+                    label="S Label Document"
                     value={documents.sLabelDocument}
                     onChange={(file) => setDocuments({...documents, sLabelDocument: file})}
                   />
