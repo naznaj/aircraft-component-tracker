@@ -12,9 +12,10 @@ interface DetailPanelProps {
   request: RobbingRequest;
   onClose: () => void;
   onStatusChange: (status: string) => void;
+  onActionSelect: (request: RobbingRequest, action: string) => void;
 }
 
-export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelProps) {
+export function DetailPanel({ request, onClose, onStatusChange, onActionSelect }: DetailPanelProps) {
   const { currentUser } = useAuth();
   const { canChangeStatus, getAvailableStatusTransitions, updateRequest } = useRobbing();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['general']));
