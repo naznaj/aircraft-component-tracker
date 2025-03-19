@@ -21,7 +21,7 @@ export function StatusScorecard({ status, count, isActive, onClick }: StatusScor
         isActive 
           ? 'ring-2 ring-primary ring-opacity-50 transform scale-105' 
           : 'hover:bg-gray-50'
-      } min-w-[120px] bg-white`}
+      } min-w-[120px] bg-white rounded-md shadow p-3 transition-all duration-200`}
     >
       <div className="flex justify-between items-center mb-2">
         <span className={`${statusClass} text-xs px-2 py-1 rounded-full`}>
@@ -36,17 +36,13 @@ export function StatusScorecard({ status, count, isActive, onClick }: StatusScor
 
 interface StatusScorecardsProps {
   statusCounts: Record<RobbingStatus, number>;
-  activeStatus: RobbingStatus | null;
-  onStatusClick: (status: RobbingStatus | null) => void;
+  activeStatuses: RobbingStatus[];
+  onStatusClick: (status: RobbingStatus) => void;
 }
 
-export function StatusScorecards({ statusCounts, activeStatus, onStatusClick }: StatusScorecardsProps) {
+export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }: StatusScorecardsProps) {
   const handleStatusClick = (status: RobbingStatus) => {
-    if (activeStatus === status) {
-      onStatusClick(null); // Clear filter if already active
-    } else {
-      onStatusClick(status);
-    }
+    onStatusClick(status);
   };
   
   return (
@@ -56,7 +52,7 @@ export function StatusScorecards({ statusCounts, activeStatus, onStatusClick }: 
           key={status}
           status={status as RobbingStatus}
           count={count}
-          isActive={activeStatus === status}
+          isActive={activeStatuses.includes(status as RobbingStatus)}
           onClick={() => handleStatusClick(status as RobbingStatus)}
         />
       ))}

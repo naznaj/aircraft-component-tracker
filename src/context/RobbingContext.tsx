@@ -12,7 +12,7 @@ interface RobbingContextType {
   selectedRequest: RobbingRequest | null;
   statusCounts: Record<RobbingStatus, number>;
   loading: boolean;
-  filterStatus: RobbingStatus | null;
+  filterStatuses: RobbingStatus[];
   sortField: keyof RobbingRequest | null;
   sortDirection: 'asc' | 'desc';
   
@@ -21,7 +21,8 @@ interface RobbingContextType {
   updateRequest: (updatedRequest: RobbingRequest) => void;
   createRequest: (newRequest: Omit<RobbingRequest, 'requestId' | 'createdDate' | 'statusHistory'>) => void;
   changeRequestStatus: (requestId: string, newStatus: RobbingStatus, comments?: string) => void;
-  setFilterStatus: (status: RobbingStatus | null) => void;
+  toggleFilterStatus: (status: RobbingStatus) => void;
+  clearFilterStatuses: () => void;
   setSortField: (field: keyof RobbingRequest | null) => void;
   setSortDirection: (direction: 'asc' | 'desc') => void;
   canChangeStatus: (request: RobbingRequest, newStatus: RobbingStatus) => boolean;
@@ -47,7 +48,7 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     'Rejected': 0
   });
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<RobbingStatus | null>(null);
+  const [filterStatuses, setFilterStatuses] = useState<RobbingStatus[]>([]);
   const [sortField, setSortField] = useState<keyof RobbingRequest | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -64,9 +65,9 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let filtered = [...requests];
     
-    // Apply status filter
-    if (filterStatus) {
-      filtered = filtered.filter(request => request.status === filterStatus);
+    // Apply status filters
+    if (filterStatuses.length > 0) {
+      filtered = filtered.filter(request => filterStatuses.includes(request.status));
     }
     
     // Apply sorting
@@ -92,7 +93,7 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     }
     
     setFilteredRequests(filtered);
-  }, [requests, filterStatus, sortField, sortDirection]);
+  }, [requests, filterStatuses, sortField, sortDirection]);
 
   // Update status counts
   useEffect(() => {
@@ -143,7 +144,8 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
       status: 'Initiated' as RobbingStatus,
       timestamp: createdDate,
       user: currentUser.name,
-      role: currentUser.role
+      role: currentUser.role,
+      comments: 'Request created'
     };
     
     const fullRequest: RobbingRequest = {
@@ -154,14 +156,14 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
       status: 'Initiated',
     };
     
-    // Automatically transition based on C of A
+    // Skip intermediate statuses based on C of A
     if (fullRequest.donorHasValidCofA) {
       fullRequest.status = 'Pending SDS';
       fullRequest.statusHistory.push({
         status: 'Pending SDS',
         timestamp: new Date().toISOString(),
         user: 'System',
-        role: 'Admin',
+        role: 'System',
         comments: 'Automatic transition: Donor aircraft has valid C of A'
       });
     } else {
@@ -170,7 +172,7 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
         status: 'Awaiting FTAM Approval',
         timestamp: new Date().toISOString(),
         user: 'System',
-        role: 'Admin',
+        role: 'System',
         comments: 'Automatic transition: Donor aircraft does not have valid C of A'
       });
     }
@@ -206,6 +208,35 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     }));
     
     toast.success(`Request status updated to ${newStatus}`);
+    
+    // If we updated the selected request, refresh it
+    if (selectedRequest?.requestId === requestId) {
+      setSelectedRequest(prev => prev ? {
+        ...prev,
+        status: newStatus,
+        statusHistory: [...prev.statusHistory, {
+          status: newStatus,
+          timestamp: new Date().toISOString(),
+          user: currentUser.name,
+          role: currentUser.role,
+          comments
+        }]
+      } : null);
+    }
+  };
+
+  const toggleFilterStatus = (status: RobbingStatus) => {
+    setFilterStatuses(prev => {
+      if (prev.includes(status)) {
+        return prev.filter(s => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+  };
+  
+  const clearFilterStatuses = () => {
+    setFilterStatuses([]);
   };
 
   const canChangeStatus = (request: RobbingRequest, newStatus: RobbingStatus): boolean => {
@@ -239,14 +270,15 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
         selectedRequest,
         statusCounts,
         loading,
-        filterStatus,
+        filterStatuses,
         sortField,
         sortDirection,
         selectRequest,
         updateRequest,
         createRequest,
         changeRequestStatus,
-        setFilterStatus,
+        toggleFilterStatus,
+        clearFilterStatuses,
         setSortField,
         setSortDirection,
         canChangeStatus,
