@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -121,12 +122,12 @@ export default function Dashboard() {
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
       
-      <main className="pt-16 pb-16">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-none">
-          <div className="mt-8 mb-6 flex justify-between items-center flex-wrap gap-4">
+      <main className="pt-16 pb-16 flex-1 flex flex-col">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-none flex-1 flex flex-col">
+          <div className="mt-8 mb-4 flex justify-between items-center flex-wrap gap-4">
             <h1 className="text-2xl font-semibold text-gray-900">
               Aircraft Component Robbing System
             </h1>
@@ -210,16 +211,18 @@ export default function Dashboard() {
             onStatusClick={toggleFilterStatus}
           />
           
-          <RobbingRequestTable
-            requests={filteredRequests}
-            loading={loading}
-            onRequestSelect={handleRequestSelect}
-            onActionSelect={handleActionSelect}
-            sortField={sortField}
-            sortDirection={sortDirection}
-            onSort={handleSort}
-            groupBy={groupBy}
-          />
+          <div className="flex-1 flex flex-col">
+            <RobbingRequestTable
+              requests={filteredRequests}
+              loading={loading}
+              onRequestSelect={handleRequestSelect}
+              onActionSelect={handleActionSelect}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+              groupBy={groupBy}
+            />
+          </div>
         </div>
       </main>
       

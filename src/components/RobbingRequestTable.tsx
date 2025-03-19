@@ -12,6 +12,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface RobbingRequestTableProps {
   requests: RobbingRequest[];
@@ -138,80 +146,82 @@ export function RobbingRequestTable({
   }, [filteredRequests, groupBy]);
   
   const renderTableContent = (requests: RobbingRequest[]) => (
-    <table className="data-table">
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th 
-              key={column.id}
-              className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
-              onClick={() => column.sortable && handleSort(column.id)}
-            >
-              <div className="flex items-center space-x-1">
-                <span>{column.label}</span>
-                {column.sortable && getSortIcon(column.id)}
-              </div>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      
-      <tbody>
-        {requests.length === 0 ? (
-          <tr>
-            <td colSpan={columns.length} className="text-center py-8 text-gray-500">
-              No requests found
-            </td>
-          </tr>
-        ) : (
-          requests.map((request) => (
-            <tr 
-              key={request.requestId}
-              className="cursor-pointer hover:bg-gray-50"
-              onClick={() => onRequestSelect(request)}
-            >
-              <td>{request.requestId}</td>
-              <td>
-                <StatusBadge status={request.status} />
-              </td>
-              <td>{request.donorAircraft}</td>
-              <td>{request.recipientAircraft}</td>
-              <td>
-                <div className="flex flex-col">
-                  <span className="font-medium text-gray-900">{request.component.description}</span>
-                  <span className="text-xs text-gray-500">
-                    P/N: {request.component.partNumber}, S/N: {request.component.serialNumber}
+    <div className="overflow-x-auto relative">
+      <Table className="w-full">
+        <TableHeader className="sticky top-0 z-10 bg-secondary border-b">
+          <TableRow>
+            {columns.map((column) => (
+              <TableHead 
+                key={column.id}
+                className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
+                onClick={() => column.sortable && handleSort(column.id)}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>{column.label}</span>
+                  {column.sortable && getSortIcon(column.id)}
+                </div>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        
+        <TableBody>
+          {requests.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center py-8 text-gray-500">
+                No requests found
+              </TableCell>
+            </TableRow>
+          ) : (
+            requests.map((request) => (
+              <TableRow 
+                key={request.requestId}
+                className="cursor-pointer hover:bg-gray-50"
+                onClick={() => onRequestSelect(request)}
+              >
+                <TableCell>{request.requestId}</TableCell>
+                <TableCell>
+                  <StatusBadge status={request.status} />
+                </TableCell>
+                <TableCell>{request.donorAircraft}</TableCell>
+                <TableCell>{request.recipientAircraft}</TableCell>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900">{request.component.description}</span>
+                    <span className="text-xs text-gray-500">
+                      P/N: {request.component.partNumber}, S/N: {request.component.serialNumber}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {renderComponentStatus(
+                    request.component.status, 
+                    ['Removed from Donor', 'Normalization Planned', 'Normalized'].includes(request.status),
+                    !!request.documentation.sLabelReference
+                  )}
+                </TableCell>
+                <TableCell>{formatDate(request.createdDate)}</TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getPriorityBadgeClass(request.priority)}`}>
+                    {request.priority}
                   </span>
-                </div>
-              </td>
-              <td>
-                {renderComponentStatus(
-                  request.component.status, 
-                  ['Removed from Donor', 'Normalization Planned', 'Normalized'].includes(request.status),
-                  !!request.documentation.sLabelReference
-                )}
-              </td>
-              <td>{formatDate(request.createdDate)}</td>
-              <td>
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getPriorityBadgeClass(request.priority)}`}>
-                  {request.priority}
-                </span>
-              </td>
-              <td className="text-right">
-                <div onClick={(e) => e.stopPropagation()}>
-                  <ActionButton
-                    request={request}
-                    onAction={(action) => onActionSelect(request, action)}
-                    variant="outline"
-                    size="sm"
-                  />
-                </div>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <ActionButton
+                      request={request}
+                      onAction={(action) => onActionSelect(request, action)}
+                      variant="outline"
+                      size="sm"
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
   
   const renderGroupedTable = () => (
@@ -225,9 +235,7 @@ export function RobbingRequestTable({
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-0 pb-0">
-            <div className="overflow-x-auto">
-              {renderTableContent(groupRequests)}
-            </div>
+            {renderTableContent(groupRequests)}
           </AccordionContent>
         </AccordionItem>
       ))}
@@ -261,7 +269,7 @@ export function RobbingRequestTable({
         </div>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
         {loading ? (
           <div className="p-4">
             {[...Array(5)].map((_, index) => (

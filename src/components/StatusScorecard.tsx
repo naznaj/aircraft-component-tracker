@@ -1,7 +1,9 @@
 
+import { useState } from 'react';
 import { RobbingStatus } from '../types';
 import { getStatusBadgeClass } from '../utils/formatters';
 import { getStatusDescription, getAllStatuses } from '../utils/statusTransitions';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface StatusScorecardProps {
   status: RobbingStatus;
@@ -41,6 +43,8 @@ interface StatusScorecardsProps {
 }
 
 export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }: StatusScorecardsProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
   const handleStatusClick = (status: RobbingStatus) => {
     onStatusClick(status);
   };
@@ -59,16 +63,59 @@ export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }
   ];
   
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 animate-fadeIn">
-      {orderedStatuses.map(status => (
-        <StatusScorecard
-          key={status}
-          status={status}
-          count={statusCounts[status] || 0}
-          isActive={activeStatuses.includes(status)}
-          onClick={() => handleStatusClick(status)}
-        />
-      ))}
+    <div className="mb-6 animate-fadeIn">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Status Summary</h3>
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+        >
+          {isCollapsed ? (
+            <>
+              <span>Expand</span>
+              <ChevronDown className="ml-1 h-4 w-4" />
+            </>
+          ) : (
+            <>
+              <span>Collapse</span>
+              <ChevronUp className="ml-1 h-4 w-4" />
+            </>
+          )}
+        </button>
+      </div>
+
+      {!isCollapsed && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {orderedStatuses.map(status => (
+            <StatusScorecard
+              key={status}
+              status={status}
+              count={statusCounts[status] || 0}
+              isActive={activeStatuses.includes(status)}
+              onClick={() => handleStatusClick(status)}
+            />
+          ))}
+        </div>
+      )}
+      
+      {isCollapsed && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {activeStatuses.map(status => (
+            <div 
+              key={status}
+              className={`${getStatusBadgeClass(status)} text-xs px-2 py-1 rounded-full flex items-center`}
+            >
+              {status}
+              <span className="ml-1 bg-white/30 rounded-full px-1.5 py-0.5 text-xs font-bold">
+                {statusCounts[status] || 0}
+              </span>
+            </div>
+          ))}
+          {activeStatuses.length === 0 && (
+            <span className="text-sm text-gray-500">No filters applied</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
