@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -14,7 +13,7 @@ import { FTAMApprovalDrawer } from '../components/forms/FTAMApprovalDrawer';
 import { NormalizedConfirmationDrawer } from '../components/forms/NormalizedConfirmationDrawer';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Filter, ChevronDown, X, FileText } from 'lucide-react';
+import { Plus, ChevronDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -80,21 +79,19 @@ export default function Dashboard() {
   const handleActionSelect = (request: RobbingRequest, action: string) => {
     setActiveRequest(request);
     
-    // Match actions to the correct UI components
-    if (action === 'Pending AR') {
+    if (action === 'Submit SDS') {
       setShowSDSDrawer(true);
-    } else if (action === 'Pending Removal from Donor') {
+    } else if (action === 'Submit Acceptance Report') {
       setShowAcceptanceReportDrawer(true);
-    } else if (action === 'Removed from Donor') {
+    } else if (action === 'Mark as Removed') {
       setShowComponentRemovalDrawer(true);
-    } else if (action === 'Awaiting FTAM Approval') {
+    } else if (action === 'Approve Request') {
       setShowFTAMApprovalDrawer(true);
-    } else if (action === 'Normalization Planned') {
+    } else if (action === 'Plan Normalization') {
       setShowNormalizationForm(true);
-    } else if (action === 'Normalized') {
+    } else if (action === 'Mark as Normalized') {
       setShowNormalizedConfirmationDrawer(true);
     } else {
-      // For simple status transitions with no forms
       changeRequestStatus(request.requestId, action as RobbingStatus);
       toast.success(`Request status updated to ${action}`);
     }
@@ -112,7 +109,6 @@ export default function Dashboard() {
   };
   
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
-  const showSDSButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,20 +176,6 @@ export default function Dashboard() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
-              {showSDSButton && (
-                <Button
-                  onClick={() => {
-                    setActiveRequest(null);
-                    setShowSDSDrawer(true);
-                  }}
-                  variant="secondary"
-                  className="inline-flex items-center"
-                >
-                  <FileText className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Submit SDS
-                </Button>
-              )}
               
               {showCreateButton && (
                 <Button

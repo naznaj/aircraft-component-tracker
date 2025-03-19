@@ -8,6 +8,7 @@ import { ComponentDetailsStep } from "./sds/ComponentDetailsStep";
 import { LifeRemainingStep } from "./sds/LifeRemainingStep";
 import { DeclarationsStep } from "./sds/DeclarationsStep";
 import { SignatureStep } from "./sds/SignatureStep";
+import { Wand2 } from "lucide-react";
 
 interface SDSSubmissionDrawerProps {
   isOpen: boolean;
@@ -36,7 +37,8 @@ export function SDSSubmissionDrawer({ isOpen, onClose, request }: SDSSubmissionD
     setSignature,
     handleNext,
     handlePrevious,
-    handleSubmit
+    handleSubmit,
+    handleAutoFill
   } = useSDSFormState(request, onClose);
   
   const renderStepContent = () => {
@@ -48,6 +50,7 @@ export function SDSSubmissionDrawer({ isOpen, onClose, request }: SDSSubmissionD
             setComponentDetails={setComponentDetails}
             robbingReason={robbingReason}
             setRobbingReason={setRobbingReason}
+            onAutoFill={handleAutoFill}
           />
         );
         
@@ -87,25 +90,40 @@ export function SDSSubmissionDrawer({ isOpen, onClose, request }: SDSSubmissionD
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent className="max-h-[90vh]">
-        <DrawerHeader>
-          <DrawerTitle className="text-xl">Submit SDS (Spares Declaration Statement)</DrawerTitle>
+        <DrawerHeader className="border-b pb-4">
+          <div className="flex items-center justify-between">
+            <DrawerTitle className="text-xl">Submit Spares Declaration Statement</DrawerTitle>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1" 
+              onClick={handleAutoFill}
+            >
+              <Wand2 className="h-4 w-4" />
+              Auto-fill
+            </Button>
+          </div>
           {request && (
-            <p className="text-sm text-muted-foreground">Request ID: {request.requestId}</p>
+            <div className="text-sm text-muted-foreground mt-1">
+              <div>Request ID: {request.requestId}</div>
+              <div>Donor Aircraft: {request.donorAircraft}</div>
+              <div>Recipient Aircraft: {request.recipientAircraft}</div>
+            </div>
           )}
         </DrawerHeader>
         
-        <div className="p-4 overflow-y-auto">
+        <div className="p-4 overflow-y-auto bg-gray-50">
           <FormProgressSteps 
             currentStep={currentStep}
             totalSteps={totalSteps}
           />
           
-          <div className="mt-4 pb-24">
+          <div className="mt-6 pb-24 bg-white p-6 rounded-lg shadow-sm">
             {renderStepContent()}
           </div>
         </div>
         
-        <DrawerFooter className="flex flex-row justify-end gap-2 border-t pt-4">
+        <DrawerFooter className="flex flex-row justify-end gap-2 border-t pt-4 bg-white">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
