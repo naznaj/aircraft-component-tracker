@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
@@ -20,7 +21,7 @@ interface RobbingRequestTableProps {
   sortField: keyof RobbingRequest | null;
   sortDirection: 'asc' | 'desc';
   onSort: (field: keyof RobbingRequest) => void;
-  groupBy?: 'none' | 'donorAircraft' | 'recipientAircraft' | 'component';
+  groupBy?: 'none' | 'donorAircraft' | 'recipientAircraft' | 'component' | 'request';
 }
 
 export function RobbingRequestTable({
@@ -123,6 +124,8 @@ export function RobbingRequestTable({
         key = request.recipientAircraft;
       } else if (groupBy === 'component') {
         key = `${request.component.description} (${request.component.partNumber})`;
+      } else if (groupBy === 'request') {
+        key = request.requestId;
       }
       
       if (!acc[key]) {

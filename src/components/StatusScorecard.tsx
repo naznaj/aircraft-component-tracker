@@ -45,8 +45,18 @@ export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }
     onStatusClick(status);
   };
   
-  // Get all statuses in their proper transition order
-  const orderedStatuses = getAllStatuses();
+  // Custom ordering of the statuses with "Pending AR" before "Pending SDS"
+  const orderedStatuses: RobbingStatus[] = [
+    'Initiated', 
+    'Pending AR', 
+    'Pending SDS', 
+    'Awaiting FTAM Approval', 
+    'Pending Removal from Donor', 
+    'Removed from Donor', 
+    'Normalization Planned', 
+    'Normalized', 
+    'Rejected'
+  ];
   
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 animate-fadeIn">

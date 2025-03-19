@@ -15,7 +15,7 @@ import { SLabelSubmissionDrawer } from '../components/forms/SLabelSubmissionDraw
 import { ReportUnserviceableDrawer } from '../components/forms/ReportUnserviceableDrawer';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Filter, ChevronDown, X } from 'lucide-react';
+import { Plus, Filter, ChevronDown, X, ListTree } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -54,7 +54,7 @@ export default function Dashboard() {
   const [showSLabelDrawer, setShowSLabelDrawer] = useState(false);
   const [showReportUnserviceableDrawer, setShowReportUnserviceableDrawer] = useState(false);
   const [activeRequest, setActiveRequest] = useState<RobbingRequest | null>(null);
-  const [groupBy, setGroupBy] = useState<'none' | 'donorAircraft' | 'recipientAircraft' | 'component'>('none');
+  const [groupBy, setGroupBy] = useState<'none' | 'donorAircraft' | 'recipientAircraft' | 'component' | 'request'>('none');
   
   const handleSort = (field: keyof RobbingRequest) => {
     if (sortField === field) {
@@ -164,16 +164,21 @@ export default function Dashboard() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="flex items-center gap-2">
+                    <ListTree className="h-4 w-4 mr-1" />
                     Group by: {groupBy === 'none' ? 'None' : 
                               groupBy === 'donorAircraft' ? 'Donor Aircraft' : 
                               groupBy === 'recipientAircraft' ? 'Recipient Aircraft' : 
-                              'Component'} 
+                              groupBy === 'component' ? 'Component' :
+                              'Request'} 
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setGroupBy('none')}>
                     None
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setGroupBy('request')}>
+                    Request
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setGroupBy('donorAircraft')}>
                     Donor Aircraft
