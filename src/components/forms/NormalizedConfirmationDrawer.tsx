@@ -24,6 +24,10 @@ export function NormalizedConfirmationDrawer({ isOpen, onClose, request }: Norma
   const [submitting, setSubmitting] = useState(false);
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   
+  // New state for part number and serial number
+  const [installedPartNumber, setInstalledPartNumber] = useState('');
+  const [installedSerialNumber, setInstalledSerialNumber] = useState('');
+  
   const handleSubmit = () => {
     if (!request) return;
     
@@ -36,7 +40,9 @@ export function NormalizedConfirmationDrawer({ isOpen, onClose, request }: Norma
         ...request.normalization,
         actualCompletionDate: completionDate.toISOString(),
         completionWorkOrder: workOrderReference,
-        completionEvidence: evidenceFile || request.normalization.completionEvidence
+        completionEvidence: evidenceFile || request.normalization.completionEvidence,
+        installedPartNumber,
+        installedSerialNumber
       }
     };
     
@@ -46,7 +52,7 @@ export function NormalizedConfirmationDrawer({ isOpen, onClose, request }: Norma
     changeRequestStatus(
       request.requestId,
       'Normalized',
-      `Aircraft normalized on ${format(completionDate, 'PPP')}. Work Order: ${workOrderReference}. ${additionalNotes ? `Notes: ${additionalNotes}` : ''}`
+      `Aircraft normalized on ${format(completionDate, 'PPP')}. Work Order: ${workOrderReference}. Installed P/N: ${installedPartNumber}, S/N: ${installedSerialNumber}. ${additionalNotes ? `Notes: ${additionalNotes}` : ''}`
     );
     
     setSubmitting(false);
@@ -91,6 +97,40 @@ export function NormalizedConfirmationDrawer({ isOpen, onClose, request }: Norma
             </div>
             
             <div>
+              <Label htmlFor="installedPartNumber">Installed Part Number (P/N) *</Label>
+              <Input
+                id="installedPartNumber"
+                value={installedPartNumber}
+                onChange={(e) => setInstalledPartNumber(e.target.value)}
+                placeholder="Enter the P/N of the component installed on donor aircraft"
+                className="mt-1"
+                required
+              />
+              {request && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Original component P/N: {request.component.partNumber}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="installedSerialNumber">Installed Serial Number (S/N) *</Label>
+              <Input
+                id="installedSerialNumber"
+                value={installedSerialNumber}
+                onChange={(e) => setInstalledSerialNumber(e.target.value)}
+                placeholder="Enter the S/N of the component installed on donor aircraft"
+                className="mt-1"
+                required
+              />
+              {request && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Original component S/N: {request.component.serialNumber}
+                </p>
+              )}
+            </div>
+            
+            <div>
               <DocumentUploader
                 label="Upload Normalization Evidence *"
                 onFileChange={setEvidenceFile}
@@ -118,7 +158,7 @@ export function NormalizedConfirmationDrawer({ isOpen, onClose, request }: Norma
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={submitting || !workOrderReference || !evidenceFile}
+            disabled={submitting || !workOrderReference || !installedPartNumber || !installedSerialNumber || !evidenceFile}
           >
             {submitting ? 'Submitting...' : 'Confirm Normalization Complete'}
           </Button>

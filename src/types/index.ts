@@ -1,4 +1,3 @@
-
 export type RobbingStatus = 
   | 'Initiated'
   | 'Pending SDS'
@@ -58,6 +57,8 @@ export interface Normalization {
   actualCompletionDate: string | null;
   completionWorkOrder: string | null;
   completionEvidence: File | null;
+  installedPartNumber?: string;
+  installedSerialNumber?: string;
 }
 
 export interface RobbingRequest {
