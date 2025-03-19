@@ -1,11 +1,10 @@
-
 import { useMemo, useState } from 'react';
-import { RobbingRequest, TableColumn, RobbingStatus } from '../types';
+import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { ActionButton } from './ActionButton';
 import { formatDate } from '../utils/formatters';
 import { getPriorityBadgeClass } from '../utils/formatters';
-import { ChevronDown, ChevronUp, Search, X, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, X, ShieldCheck, ShieldX, AlertTriangle } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -42,6 +41,7 @@ export function RobbingRequestTable({
     { id: 'donorAircraft', label: 'Donor Aircraft', sortable: true },
     { id: 'recipientAircraft', label: 'Recipient Aircraft', sortable: true },
     { id: 'component', label: 'Component' },
+    { id: 'componentStatus', label: 'Robbed Component Serviceable Status' },
     { id: 'createdDate', label: 'Created Date', sortable: true },
     { id: 'priority', label: 'Priority' },
     { id: 'actions', label: 'Actions', align: 'right' }
@@ -80,6 +80,35 @@ export function RobbingRequestTable({
     ) : (
       <ChevronDown className="w-4 h-4" />
     );
+  };
+  
+  const renderComponentStatus = (status: ComponentStatus, componentRemoved: boolean) => {
+    if (!componentRemoved) {
+      return null;
+    }
+    
+    if (status === 'Serviceable') {
+      return (
+        <div className="flex items-center text-green-600">
+          <ShieldCheck className="h-4 w-4 mr-1" />
+          <span>Serviceable</span>
+        </div>
+      );
+    } else if (status === 'Unserviceable') {
+      return (
+        <div className="flex items-center text-red-600">
+          <ShieldX className="h-4 w-4 mr-1" />
+          <span>Unserviceable</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center text-amber-600">
+          <AlertTriangle className="h-4 w-4 mr-1" />
+          <span>Pending</span>
+        </div>
+      );
+    }
   };
   
   const groupedRequests = useMemo(() => {
@@ -152,6 +181,12 @@ export function RobbingRequestTable({
                   </span>
                 </div>
               </td>
+              <td>
+                {renderComponentStatus(
+                  request.component.status, 
+                  ['Removed from Donor', 'Normalization Planned', 'Normalized'].includes(request.status)
+                )}
+              </td>
               <td>{formatDate(request.createdDate)}</td>
               <td>
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getPriorityBadgeClass(request.priority)}`}>
@@ -162,7 +197,7 @@ export function RobbingRequestTable({
                 <div onClick={(e) => e.stopPropagation()}>
                   <ActionButton
                     request={request}
-                    onAction={(action) => onActionSelect(request, action as RobbingStatus)}
+                    onAction={(action) => onActionSelect(request, action)}
                     variant="outline"
                     size="sm"
                   />

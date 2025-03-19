@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -12,9 +11,11 @@ import { AcceptanceReportDrawer } from '../components/forms/AcceptanceReportDraw
 import { ComponentRemovalDrawer } from '../components/forms/ComponentRemovalDrawer';
 import { FTAMApprovalDrawer } from '../components/forms/FTAMApprovalDrawer';
 import { NormalizedConfirmationDrawer } from '../components/forms/NormalizedConfirmationDrawer';
+import { SLabelSubmissionDrawer } from '../components/forms/SLabelSubmissionDrawer';
+import { ReportUnserviceableDrawer } from '../components/forms/ReportUnserviceableDrawer';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Filter, ChevronDown, X, FileText } from 'lucide-react';
+import { Plus, Filter, ChevronDown, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -50,6 +51,8 @@ export default function Dashboard() {
   const [showComponentRemovalDrawer, setShowComponentRemovalDrawer] = useState(false);
   const [showFTAMApprovalDrawer, setShowFTAMApprovalDrawer] = useState(false);
   const [showNormalizedConfirmationDrawer, setShowNormalizedConfirmationDrawer] = useState(false);
+  const [showSLabelDrawer, setShowSLabelDrawer] = useState(false);
+  const [showReportUnserviceableDrawer, setShowReportUnserviceableDrawer] = useState(false);
   const [activeRequest, setActiveRequest] = useState<RobbingRequest | null>(null);
   const [groupBy, setGroupBy] = useState<'none' | 'donorAircraft' | 'recipientAircraft' | 'component'>('none');
   
@@ -80,7 +83,6 @@ export default function Dashboard() {
   const handleActionSelect = (request: RobbingRequest, action: string) => {
     setActiveRequest(request);
     
-    // Match actions to the correct UI components
     if (action === 'Pending AR') {
       setShowSDSDrawer(true);
     } else if (action === 'Pending Removal from Donor') {
@@ -93,8 +95,11 @@ export default function Dashboard() {
       setShowNormalizationForm(true);
     } else if (action === 'Normalized') {
       setShowNormalizedConfirmationDrawer(true);
+    } else if (action === 'SubmitSLabel') {
+      setShowSLabelDrawer(true);
+    } else if (action === 'ReportUnserviceable') {
+      setShowReportUnserviceableDrawer(true);
     } else {
-      // For simple status transitions with no forms
       changeRequestStatus(request.requestId, action as RobbingStatus);
       toast.success(`Request status updated to ${action}`);
     }
@@ -108,6 +113,8 @@ export default function Dashboard() {
     setShowComponentRemovalDrawer(false);
     setShowFTAMApprovalDrawer(false);
     setShowNormalizedConfirmationDrawer(false);
+    setShowSLabelDrawer(false);
+    setShowReportUnserviceableDrawer(false);
     setActiveRequest(null);
   };
   
@@ -256,6 +263,18 @@ export default function Dashboard() {
       
       <NormalizedConfirmationDrawer
         isOpen={showNormalizedConfirmationDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <SLabelSubmissionDrawer
+        isOpen={showSLabelDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <ReportUnserviceableDrawer
+        isOpen={showReportUnserviceableDrawer}
         onClose={handleFormClose}
         request={activeRequest || selectedRequest}
       />

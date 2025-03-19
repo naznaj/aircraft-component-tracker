@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { useRobbing } from '../context/RobbingContext';
+import { useAuth } from '../context/AuthContext';
 import { getStatusTransitions } from '../utils/statusTransitions';
 import { Button } from "@/components/ui/button";
+import { PackageCheck, PackageX } from 'lucide-react';
 
 interface ActionButtonProps {
   request: RobbingRequest;
@@ -19,9 +21,36 @@ export function ActionButton({
   size = 'default'
 }: ActionButtonProps) {
   const { canChangeStatus, getAvailableStatusTransitions } = useRobbing();
+  const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   
   const availableTransitions = getAvailableStatusTransitions(request);
+  
+  // Special case for Material Store - Add S Label or Report Unserviceable
+  if (currentUser?.role === 'Material Store' && request.status === 'Removed from Donor') {
+    return (
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size={size}
+          onClick={() => onAction('SubmitSLabel')}
+          className="flex items-center"
+        >
+          <PackageCheck className="h-4 w-4 mr-2" />
+          Submit S Label
+        </Button>
+        <Button
+          variant="outline"
+          size={size}
+          onClick={() => onAction('ReportUnserviceable')}
+          className="flex items-center"
+        >
+          <PackageX className="h-4 w-4 mr-2" />
+          Report Unserviceable
+        </Button>
+      </div>
+    );
+  }
   
   if (availableTransitions.length === 0) {
     return null;
