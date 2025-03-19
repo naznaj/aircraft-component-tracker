@@ -24,7 +24,7 @@ export const useSDSFormState = (request?: RobbingRequest | null, onClose?: () =>
     calendarDays: '',
   });
   
-  const [robbingReason, setRobbingReason] = useState(request?.reason || '');
+  const [robbingReason, setRobbingReason] = useState('');
   
   // Declaration states
   const [declarations, setDeclarations] = useState({
@@ -54,7 +54,7 @@ export const useSDSFormState = (request?: RobbingRequest | null, onClose?: () =>
     name: '',
     staffId: '',
     designation: '',
-    date: new Date().toISOString().split('T')[0],
+    date: '',
   });
   
   const totalSteps = 4;
@@ -94,47 +94,6 @@ export const useSDSFormState = (request?: RobbingRequest | null, onClose?: () =>
     });
   };
 
-  const handleAutoFill = () => {
-    // Auto-fill component details if request exists
-    if (request) {
-      setComponentDetails({
-        partNo: request.component.partNumber,
-        serialNo: request.component.serialNumber,
-        description: request.component.description,
-        ataChapter: request.component.ataChapter,
-        physicalLocation: request.component.physicalLocation || 'Donor Aircraft',
-      });
-      
-      setRobbingReason(request.reason);
-      
-      // Auto-fill life remaining with sample data
-      setLifeRemaining({
-        cycles: '850',
-        hours: '2500',
-        calendarDays: '365',
-      });
-      
-      // Auto-fill declarations - set all to true for convenience
-      const autoDeclarations = {} as Record<string, boolean>;
-      Object.keys(declarations).forEach(key => {
-        autoDeclarations[key] = true;
-      });
-      setDeclarations(autoDeclarations as typeof declarations);
-      
-      // Set signature with user info if available
-      setSignature({
-        name: 'John Smith',
-        staffId: 'EMP001',
-        designation: 'CAMO Planning Engineer',
-        date: new Date().toISOString().split('T')[0],
-      });
-      
-      toast.success('Form auto-filled with available data');
-    } else {
-      toast.error('No request data available to auto-fill');
-    }
-  };
-
   return {
     currentStep,
     loading,
@@ -155,7 +114,6 @@ export const useSDSFormState = (request?: RobbingRequest | null, onClose?: () =>
     setSignature,
     handleNext,
     handlePrevious,
-    handleSubmit,
-    handleAutoFill
+    handleSubmit
   };
 };

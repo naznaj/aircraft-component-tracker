@@ -14,19 +14,17 @@ interface ComponentDetailsStepProps {
   setComponentDetails: (details: any) => void;
   robbingReason: string;
   setRobbingReason: (reason: string) => void;
-  onAutoFill?: () => void;
 }
 
 export function ComponentDetailsStep({
   componentDetails,
   setComponentDetails,
   robbingReason,
-  setRobbingReason,
-  onAutoFill
+  setRobbingReason
 }: ComponentDetailsStepProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">Component Details</h3>
+      <h3 className="text-lg font-medium">Component Details</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -36,7 +34,6 @@ export function ComponentDetailsStep({
             value={componentDetails.partNo} 
             onChange={(e) => setComponentDetails({...componentDetails, partNo: e.target.value})}
             placeholder="Enter part number"
-            className="border-gray-300"
           />
         </div>
         
@@ -47,7 +44,6 @@ export function ComponentDetailsStep({
             value={componentDetails.serialNo} 
             onChange={(e) => setComponentDetails({...componentDetails, serialNo: e.target.value})}
             placeholder="Enter serial number"
-            className="border-gray-300"
           />
         </div>
       </div>
@@ -59,7 +55,6 @@ export function ComponentDetailsStep({
           value={componentDetails.description} 
           onChange={(e) => setComponentDetails({...componentDetails, description: e.target.value})}
           placeholder="Enter component description"
-          className="border-gray-300"
         />
       </div>
       
@@ -71,7 +66,6 @@ export function ComponentDetailsStep({
             value={componentDetails.ataChapter} 
             onChange={(e) => setComponentDetails({...componentDetails, ataChapter: e.target.value})}
             placeholder="Enter ATA chapter"
-            className="border-gray-300"
           />
         </div>
         
@@ -82,7 +76,6 @@ export function ComponentDetailsStep({
             value={componentDetails.physicalLocation} 
             onChange={(e) => setComponentDetails({...componentDetails, physicalLocation: e.target.value})}
             placeholder="Enter physical location"
-            className="border-gray-300"
           />
         </div>
       </div>
@@ -94,7 +87,7 @@ export function ComponentDetailsStep({
           value={robbingReason} 
           onChange={(e) => setRobbingReason(e.target.value)}
           placeholder="Explain the reason for this robbing request"
-          className="min-h-[100px] border-gray-300"
+          className="min-h-[100px]"
         />
       </div>
     </div>
