@@ -112,7 +112,6 @@ export default function Dashboard() {
   };
   
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
-  const showSDSButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,20 +179,6 @@ export default function Dashboard() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
-              {showSDSButton && (
-                <Button
-                  onClick={() => {
-                    setActiveRequest(null);
-                    setShowSDSDrawer(true);
-                  }}
-                  variant="secondary"
-                  className="inline-flex items-center"
-                >
-                  <FileText className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Submit SDS
-                </Button>
-              )}
               
               {showCreateButton && (
                 <Button

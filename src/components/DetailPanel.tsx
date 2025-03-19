@@ -60,87 +60,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
     updateRequest(updatedRequest);
   };
   
-  const statusActions = getAvailableStatusTransitions(request);
-  
-  const renderActionControls = () => {
-    if (statusActions.length === 0) return null;
-    
-    return (
-      <div className="mt-6 border-t pt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Available Actions</h3>
-        
-        {statusActions.map(status => (
-          <div key={status} className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Change status to:</h4>
-            <div className="flex flex-col space-y-3">
-              <StatusBadge status={status} className="self-start mb-2" />
-              
-              {['Pending AR', 'Pending SDS', 'Removed from Donor'].includes(status) && (
-                <div className="mt-2">
-                  {status === 'Pending AR' && (
-                    <DocumentUploader
-                      label="Upload Acceptance Report"
-                      referenceField
-                      referenceValue={request.documentation.acceptanceReportReference}
-                      onReferenceChange={(value) => handleReferenceChange('acceptanceReport', value)}
-                      onFileChange={(file) => handleDocumentUpload('acceptanceReportDocument', file)}
-                      description="Required to proceed"
-                    />
-                  )}
-                  
-                  {status === 'Pending SDS' && (
-                    <DocumentUploader
-                      label="Upload SDS Document"
-                      referenceField
-                      referenceValue={request.documentation.sdsReference}
-                      onReferenceChange={(value) => handleReferenceChange('sds', value)}
-                      onFileChange={(file) => handleDocumentUpload('sdsDocument', file)}
-                      description="Required to proceed"
-                    />
-                  )}
-                  
-                  {status === 'Removed from Donor' && (
-                    <DocumentUploader
-                      label="Upload CAAM Form 1"
-                      referenceField
-                      referenceValue={request.documentation.caamForm1Reference}
-                      onReferenceChange={(value) => handleReferenceChange('caamForm1', value)}
-                      onFileChange={(file) => handleDocumentUpload('caamForm1Document', file)}
-                      description="Required to proceed"
-                    />
-                  )}
-                </div>
-              )}
-              
-              <div className="mt-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Comments
-                </label>
-                <textarea
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
-                  rows={3}
-                  placeholder="Add any relevant notes or comments..."
-                />
-              </div>
-              
-              <button
-                onClick={() => {
-                  onStatusChange(status);
-                  setComments('');
-                }}
-                className="mt-2 bg-primary text-white py-2 px-4 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-              >
-                Confirm Status Change
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-gray-500 bg-opacity-75 transition-opacity animate-fadeIn">
       <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex">
@@ -463,8 +382,6 @@ export function DetailPanel({ request, onClose, onStatusChange }: DetailPanelPro
                         )}
                       </div>
                     </div>
-                    
-                    {renderActionControls()}
                   </div>
                 </div>
               </div>
