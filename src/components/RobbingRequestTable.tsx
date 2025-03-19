@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';

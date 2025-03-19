@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RobbingRequest, UserRole } from '@/types';
 import { useRobbing } from '@/context/RobbingContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface ReportUnserviceableDrawerProps {
   isOpen: boolean;
@@ -15,11 +16,12 @@ interface ReportUnserviceableDrawerProps {
 
 export function ReportUnserviceableDrawer({ isOpen, onClose, request }: ReportUnserviceableDrawerProps) {
   const { updateRequest } = useRobbing();
+  const { currentUser } = useAuth();
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   
   const handleSubmit = () => {
-    if (!request) return;
+    if (!request || !currentUser) return;
     
     setSubmitting(true);
     
@@ -35,8 +37,8 @@ export function ReportUnserviceableDrawer({ isOpen, onClose, request }: ReportUn
         {
           status: request.status,
           timestamp: new Date().toISOString(),
-          user: 'Lisa Wong', // This would be currentUser.name in a real app
-          role: 'Material Store' as UserRole,
+          user: currentUser.name,
+          role: currentUser.role,
           comments: `Component reported as Unserviceable. Reason: ${reason}`
         }
       ]
@@ -45,6 +47,7 @@ export function ReportUnserviceableDrawer({ isOpen, onClose, request }: ReportUn
     updateRequest(updatedRequest);
     setSubmitting(false);
     onClose();
+    setReason('');
   };
   
   return (

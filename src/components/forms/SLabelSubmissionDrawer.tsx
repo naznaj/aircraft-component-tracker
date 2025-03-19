@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DocumentUploader } from "@/components/DocumentUploader";
-import { RobbingRequest, UserRole } from '@/types';
+import { RobbingRequest } from '@/types';
 import { useRobbing } from '@/context/RobbingContext';
+import { useAuth } from '@/context/AuthContext';
 
 interface SLabelSubmissionDrawerProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface SLabelSubmissionDrawerProps {
 
 export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmissionDrawerProps) {
   const { updateRequest } = useRobbing();
+  const { currentUser } = useAuth();
   const [referenceNumber, setReferenceNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [sLabelFile, setSLabelFile] = useState<File | null>(null);
@@ -31,7 +33,7 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
   }, [request, isOpen, isUpdate]);
   
   const handleSubmit = () => {
-    if (!request) return;
+    if (!request || !currentUser) return;
     
     setSubmitting(true);
     
@@ -52,8 +54,8 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
         {
           status: request.status,
           timestamp: new Date().toISOString(),
-          user: 'Lisa Wong', // This would be currentUser.name in a real app
-          role: 'Material Store' as UserRole,
+          user: currentUser.name,
+          role: currentUser.role,
           comments: `${isUpdate ? 'S Label updated' : 'S Label submitted'}. Reference: ${referenceNumber}. Component marked as Serviceable. ${notes ? `Notes: ${notes}` : ''}`
         }
       ]
@@ -62,6 +64,9 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
     updateRequest(updatedRequest);
     setSubmitting(false);
     onClose();
+    setReferenceNumber('');
+    setNotes('');
+    setSLabelFile(null);
   };
   
   return (
