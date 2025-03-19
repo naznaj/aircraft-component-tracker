@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
@@ -148,7 +149,7 @@ export function RobbingRequestTable({
   const renderTableContent = (requests: RobbingRequest[]) => (
     <div className="overflow-x-auto relative">
       <Table className="w-full">
-        <TableHeader className="sticky-header">
+        <TableHeader className="table-header-sticky">
           <TableRow>
             {columns.map((column) => (
               <TableHead 
@@ -269,7 +270,7 @@ export function RobbingRequestTable({
         </div>
       </div>
       
-      <ScrollArea className="overflow-auto max-h-[calc(100vh-300px)]">
+      <ScrollArea className="h-[calc(100vh-250px)]">
         {loading ? (
           <div className="p-4">
             {[...Array(5)].map((_, index) => (
