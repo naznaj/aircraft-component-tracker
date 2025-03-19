@@ -1,7 +1,7 @@
 
 import { RobbingStatus } from '../types';
 import { getStatusBadgeClass } from '../utils/formatters';
-import { getStatusDescription } from '../utils/statusTransitions';
+import { getStatusDescription, getAllStatuses } from '../utils/statusTransitions';
 
 interface StatusScorecardProps {
   status: RobbingStatus;
@@ -45,15 +45,18 @@ export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }
     onStatusClick(status);
   };
   
+  // Get all statuses in their proper transition order
+  const orderedStatuses = getAllStatuses();
+  
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 animate-fadeIn">
-      {Object.entries(statusCounts).map(([status, count]) => (
+      {orderedStatuses.map(status => (
         <StatusScorecard
           key={status}
-          status={status as RobbingStatus}
-          count={count}
-          isActive={activeStatuses.includes(status as RobbingStatus)}
-          onClick={() => handleStatusClick(status as RobbingStatus)}
+          status={status}
+          count={statusCounts[status] || 0}
+          isActive={activeStatuses.includes(status)}
+          onClick={() => handleStatusClick(status)}
         />
       ))}
     </div>
