@@ -156,6 +156,7 @@ export function RobbingRequestTable({
                 key={column.id}
                 className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
                 onClick={() => column.sortable && handleSort(column.id)}
+                style={{position: "absolute", top: 0}}
               >
                 <div className="flex items-center space-x-1">
                   <span>{column.label}</span>
@@ -270,7 +271,7 @@ export function RobbingRequestTable({
         </div>
       </div>
       
-      <ScrollArea className="h-[calc(100vh-250px)]">
+      <ScrollArea className="h-[calc(100vh-250px)]" style={{position: "relative"}}>
         {loading ? (
           <div className="p-4">
             {[...Array(5)].map((_, index) => (
