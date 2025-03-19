@@ -9,8 +9,9 @@ import { RequestForm } from '../components/forms/RequestForm';
 import { NormalizationPlanForm } from '../components/forms/NormalizationPlanForm';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Filter, ChevronDown, X } from 'lucide-react';
+import { Plus, Filter, ChevronDown, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,7 @@ export default function Dashboard() {
   } = useRobbing();
   
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showNormalizationForm, setShowNormalizationForm] = useState(false);
   const [normalizationRequest, setNormalizationRequest] = useState<RobbingRequest | null>(null);
@@ -71,6 +73,8 @@ export default function Dashboard() {
     if (action === 'Plan Normalization') {
       setNormalizationRequest(request);
       setShowNormalizationForm(true);
+    } else if (action === 'Submit SDS') {
+      navigate(`/sds-submission/${request.requestId}`);
     } else {
       changeRequestStatus(request.requestId, action as RobbingStatus);
       toast.success(`Request status updated to ${action}`);
@@ -151,15 +155,26 @@ export default function Dashboard() {
                 </DropdownMenuContent>
               </DropdownMenu>
               
-              {showCreateButton && (
+              <div className="flex items-center gap-2">
+                {showCreateButton && (
+                  <Button
+                    onClick={() => setShowCreateForm(true)}
+                    className="inline-flex items-center"
+                  >
+                    <Plus className="mr-2 h-5 w-5" aria-hidden="true" />
+                    Create Robbing Request
+                  </Button>
+                )}
+                
                 <Button
-                  onClick={() => setShowCreateForm(true)}
+                  variant="outline"
+                  onClick={() => navigate('/sds-submission')}
                   className="inline-flex items-center"
                 >
-                  <Plus className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Create Robbing Request
+                  <FileText className="mr-2 h-5 w-5" aria-hidden="true" />
+                  New SDS Submission
                 </Button>
-              )}
+              </div>
             </div>
           </div>
           
