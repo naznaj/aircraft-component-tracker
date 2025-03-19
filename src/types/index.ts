@@ -18,7 +18,8 @@ export type UserRole =
   | 'CAMO Technical Services'
   | 'AMO 145'
   | 'Material Store'
-  | 'Admin';
+  | 'Admin'
+  | 'System';
 
 export type PriorityLevel = 'Low' | 'Medium' | 'High';
 
