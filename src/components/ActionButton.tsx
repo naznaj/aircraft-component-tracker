@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { useRobbing } from '../context/RobbingContext';
 import { getStatusTransitions } from '../utils/statusTransitions';
+import { Button } from "@/components/ui/button";
 
 interface ActionButtonProps {
   request: RobbingRequest;
-  onAction: (action: string) => void;
+  onAction: (action: string, formData?: any) => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
 }
@@ -52,9 +53,9 @@ export function ActionButton({
   if (request.status === 'Initiated') {
     return (
       <div className="relative inline-block text-left">
-        <button
-          type="button"
-          className={getButtonClass()}
+        <Button
+          variant={variant}
+          size={size}
           onClick={() => setIsOpen(!isOpen)}
         >
           Validate C of A Status
@@ -65,7 +66,7 @@ export function ActionButton({
               clipRule="evenodd"
             />
           </svg>
-        </button>
+        </Button>
         
         {isOpen && (
           <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
@@ -100,7 +101,7 @@ export function ActionButton({
     );
   }
   
-  // For single action
+  // For single action for "Submit SDS", "Submit Acceptance Report", etc.
   if (availableTransitions.length === 1) {
     const nextStatus = availableTransitions[0];
     const transition = getStatusTransitions(request.status).transitions.find(
@@ -110,21 +111,22 @@ export function ActionButton({
     if (!transition) return null;
     
     return (
-      <button 
-        className={getButtonClass()}
+      <Button 
+        variant={variant}
+        size={size}
         onClick={() => onAction(nextStatus)}
       >
         {transition.label}
-      </button>
+      </Button>
     );
   }
   
   // For multiple actions, show dropdown
   return (
     <div className="relative inline-block text-left">
-      <button
-        type="button"
-        className={getButtonClass()}
+      <Button
+        variant={variant}
+        size={size}
         onClick={() => setIsOpen(!isOpen)}
       >
         Available Actions
@@ -135,7 +137,7 @@ export function ActionButton({
             clipRule="evenodd"
           />
         </svg>
-      </button>
+      </Button>
       
       {isOpen && (
         <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">

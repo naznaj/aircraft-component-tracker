@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -7,6 +8,10 @@ import { DetailPanel } from '../components/DetailPanel';
 import { RequestForm } from '../components/forms/RequestForm';
 import { NormalizationPlanForm } from '../components/forms/NormalizationPlanForm';
 import { SDSSubmissionDrawer } from '../components/forms/SDSSubmissionDrawer';
+import { AcceptanceReportDrawer } from '../components/forms/AcceptanceReportDrawer';
+import { ComponentRemovalDrawer } from '../components/forms/ComponentRemovalDrawer';
+import { FTAMApprovalDrawer } from '../components/forms/FTAMApprovalDrawer';
+import { NormalizedConfirmationDrawer } from '../components/forms/NormalizedConfirmationDrawer';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Filter, ChevronDown, X, FileText } from 'lucide-react';
@@ -41,8 +46,11 @@ export default function Dashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showNormalizationForm, setShowNormalizationForm] = useState(false);
   const [showSDSDrawer, setShowSDSDrawer] = useState(false);
-  const [normalizationRequest, setNormalizationRequest] = useState<RobbingRequest | null>(null);
-  const [sdsRequest, setSdsRequest] = useState<RobbingRequest | null>(null);
+  const [showAcceptanceReportDrawer, setShowAcceptanceReportDrawer] = useState(false);
+  const [showComponentRemovalDrawer, setShowComponentRemovalDrawer] = useState(false);
+  const [showFTAMApprovalDrawer, setShowFTAMApprovalDrawer] = useState(false);
+  const [showNormalizedConfirmationDrawer, setShowNormalizedConfirmationDrawer] = useState(false);
+  const [activeRequest, setActiveRequest] = useState<RobbingRequest | null>(null);
   const [groupBy, setGroupBy] = useState<'none' | 'donorAircraft' | 'recipientAircraft' | 'component'>('none');
   
   const handleSort = (field: keyof RobbingRequest) => {
@@ -70,26 +78,36 @@ export default function Dashboard() {
   };
   
   const handleActionSelect = (request: RobbingRequest, action: string) => {
-    if (action === 'Plan Normalization') {
-      setNormalizationRequest(request);
+    setActiveRequest(request);
+    
+    if (action === 'Plan Normalization' || action === 'Normalization Planned') {
       setShowNormalizationForm(true);
-    } else if (action === 'Submit SDS') {
-      setSdsRequest(request);
+    } else if (action === 'Submit SDS' || action === 'Pending SDS') {
       setShowSDSDrawer(true);
+    } else if (action === 'Submit Acceptance Report' || action === 'Pending AR') {
+      setShowAcceptanceReportDrawer(true);
+    } else if (action === 'Mark as Removed' || action === 'Pending Removal from Donor') {
+      setShowComponentRemovalDrawer(true);
+    } else if (action === 'Approve Request' || action === 'Awaiting FTAM Approval') {
+      setShowFTAMApprovalDrawer(true);
+    } else if (action === 'Mark as Normalized' || action === 'Normalized') {
+      setShowNormalizedConfirmationDrawer(true);
     } else {
+      // For simple status transitions with no forms
       changeRequestStatus(request.requestId, action as RobbingStatus);
       toast.success(`Request status updated to ${action}`);
     }
   };
   
-  const handleNormalizationPlanComplete = () => {
+  const handleFormClose = () => {
+    setShowCreateForm(false);
     setShowNormalizationForm(false);
-    setNormalizationRequest(null);
-  };
-  
-  const handleSDSDrawerClose = () => {
     setShowSDSDrawer(false);
-    setSdsRequest(null);
+    setShowAcceptanceReportDrawer(false);
+    setShowComponentRemovalDrawer(false);
+    setShowFTAMApprovalDrawer(false);
+    setShowNormalizedConfirmationDrawer(false);
+    setActiveRequest(null);
   };
   
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
@@ -164,7 +182,10 @@ export default function Dashboard() {
               
               {showSDSButton && (
                 <Button
-                  onClick={() => setShowSDSDrawer(true)}
+                  onClick={() => {
+                    setActiveRequest(null);
+                    setShowSDSDrawer(true);
+                  }}
                   variant="secondary"
                   className="inline-flex items-center"
                 >
@@ -213,20 +234,44 @@ export default function Dashboard() {
       )}
       
       {showCreateForm && (
-        <RequestForm onClose={() => setShowCreateForm(false)} />
+        <RequestForm onClose={handleFormClose} />
       )}
       
-      {showNormalizationForm && normalizationRequest && (
+      {showNormalizationForm && (
         <NormalizationPlanForm 
-          request={normalizationRequest} 
-          onClose={handleNormalizationPlanComplete} 
+          request={activeRequest || selectedRequest!} 
+          onClose={handleFormClose} 
         />
       )}
       
       <SDSSubmissionDrawer
         isOpen={showSDSDrawer}
-        onClose={handleSDSDrawerClose}
-        request={sdsRequest}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <AcceptanceReportDrawer
+        isOpen={showAcceptanceReportDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <ComponentRemovalDrawer
+        isOpen={showComponentRemovalDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <FTAMApprovalDrawer
+        isOpen={showFTAMApprovalDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
+      />
+      
+      <NormalizedConfirmationDrawer
+        isOpen={showNormalizedConfirmationDrawer}
+        onClose={handleFormClose}
+        request={activeRequest || selectedRequest}
       />
     </div>
   );
