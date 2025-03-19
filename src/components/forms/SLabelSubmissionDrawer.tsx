@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,14 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
   const [notes, setNotes] = useState('');
   const [sLabelFile, setSLabelFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const isUpdate = request?.documentation.sLabelReference ? true : false;
+  
+  // Load existing data if updating
+  useEffect(() => {
+    if (request && isOpen && isUpdate) {
+      setReferenceNumber(request.documentation.sLabelReference || '');
+    }
+  }, [request, isOpen, isUpdate]);
   
   const handleSubmit = () => {
     if (!request) return;
@@ -46,7 +54,7 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
           timestamp: new Date().toISOString(),
           user: 'Lisa Wong', // This would be currentUser.name in a real app
           role: 'Material Store' as UserRole,
-          comments: `S Label submitted. Reference: ${referenceNumber}. Component marked as Serviceable. ${notes ? `Notes: ${notes}` : ''}`
+          comments: `${isUpdate ? 'S Label updated' : 'S Label submitted'}. Reference: ${referenceNumber}. Component marked as Serviceable. ${notes ? `Notes: ${notes}` : ''}`
         }
       ]
     };
@@ -60,7 +68,7 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle className="text-xl">Submit S Label</DrawerTitle>
+          <DrawerTitle className="text-xl">{isUpdate ? 'Update S Label' : 'Submit S Label'}</DrawerTitle>
           {request && (
             <p className="text-sm text-muted-foreground">
               Request ID: {request.requestId} - {request.component.description}
@@ -87,6 +95,11 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
                 onFileChange={setSLabelFile}
                 description="Upload Serviceable Label document (PDF, JPG, PNG)"
               />
+              {isUpdate && !sLabelFile && request?.documentation.sLabelDocument && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Current document will be kept if you don't upload a new one
+                </p>
+              )}
             </div>
             
             <div>
@@ -109,9 +122,9 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={submitting || !referenceNumber || !sLabelFile}
+            disabled={submitting || !referenceNumber || (!sLabelFile && !isUpdate)}
           >
-            {submitting ? 'Submitting...' : 'Submit S Label'}
+            {submitting ? 'Submitting...' : isUpdate ? 'Update S Label' : 'Submit S Label'}
           </Button>
         </DrawerFooter>
       </DrawerContent>

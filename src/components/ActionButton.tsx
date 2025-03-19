@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { useRobbing } from '../context/RobbingContext';
@@ -26,8 +25,16 @@ export function ActionButton({
   
   const availableTransitions = getAvailableStatusTransitions(request);
   
-  // Special case for Material Store - Add S Label or Report Unserviceable
+  // Special case for Material Store - Add/Update S Label or Report Unserviceable
   if (currentUser?.role === 'Material Store' && request.status === 'Removed from Donor') {
+    const hasExistingSLabel = !!request.documentation.sLabelReference;
+    const isComponentUnserviceable = request.component.status === 'Unserviceable';
+    
+    // If component is already marked unserviceable, don't show any buttons
+    if (isComponentUnserviceable) {
+      return null;
+    }
+    
     return (
       <div className="flex gap-2">
         <Button
@@ -37,17 +44,19 @@ export function ActionButton({
           className="flex items-center"
         >
           <PackageCheck className="h-4 w-4 mr-2" />
-          Submit S Label
+          {hasExistingSLabel ? 'Update S Label' : 'Submit S Label'}
         </Button>
-        <Button
-          variant="outline"
-          size={size}
-          onClick={() => onAction('ReportUnserviceable')}
-          className="flex items-center"
-        >
-          <PackageX className="h-4 w-4 mr-2" />
-          Report Unserviceable
-        </Button>
+        {!hasExistingSLabel && (
+          <Button
+            variant="outline"
+            size={size}
+            onClick={() => onAction('ReportUnserviceable')}
+            className="flex items-center"
+          >
+            <PackageX className="h-4 w-4 mr-2" />
+            Report Unserviceable
+          </Button>
+        )}
       </div>
     );
   }

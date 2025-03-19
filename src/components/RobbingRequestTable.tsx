@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from 'react';
 import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
@@ -82,7 +83,7 @@ export function RobbingRequestTable({
     );
   };
   
-  const renderComponentStatus = (status: ComponentStatus, componentRemoved: boolean) => {
+  const renderComponentStatus = (status: ComponentStatus, componentRemoved: boolean, hasSLabel: boolean) => {
     if (!componentRemoved) {
       return null;
     }
@@ -105,7 +106,7 @@ export function RobbingRequestTable({
       return (
         <div className="flex items-center text-amber-600">
           <AlertTriangle className="h-4 w-4 mr-1" />
-          <span>Pending</span>
+          <span>Pending S Label</span>
         </div>
       );
     }
@@ -184,7 +185,8 @@ export function RobbingRequestTable({
               <td>
                 {renderComponentStatus(
                   request.component.status, 
-                  ['Removed from Donor', 'Normalization Planned', 'Normalized'].includes(request.status)
+                  ['Removed from Donor', 'Normalization Planned', 'Normalized'].includes(request.status),
+                  !!request.documentation.sLabelReference
                 )}
               </td>
               <td>{formatDate(request.createdDate)}</td>
