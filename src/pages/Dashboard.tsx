@@ -80,17 +80,18 @@ export default function Dashboard() {
   const handleActionSelect = (request: RobbingRequest, action: string) => {
     setActiveRequest(request);
     
-    if (action === 'Plan Normalization' || action === 'Normalization Planned') {
-      setShowNormalizationForm(true);
-    } else if (action === 'Submit SDS' || action === 'Pending SDS') {
+    // Match actions to the correct UI components
+    if (action === 'Pending AR') {
       setShowSDSDrawer(true);
-    } else if (action === 'Submit Acceptance Report' || action === 'Pending AR') {
+    } else if (action === 'Pending Removal from Donor') {
       setShowAcceptanceReportDrawer(true);
-    } else if (action === 'Mark as Removed' || action === 'Pending Removal from Donor') {
+    } else if (action === 'Removed from Donor') {
       setShowComponentRemovalDrawer(true);
-    } else if (action === 'Approve Request' || action === 'Awaiting FTAM Approval') {
+    } else if (action === 'Awaiting FTAM Approval') {
       setShowFTAMApprovalDrawer(true);
-    } else if (action === 'Mark as Normalized' || action === 'Normalized') {
+    } else if (action === 'Normalization Planned') {
+      setShowNormalizationForm(true);
+    } else if (action === 'Normalized') {
       setShowNormalizedConfirmationDrawer(true);
     } else {
       // For simple status transitions with no forms
