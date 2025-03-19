@@ -1,13 +1,12 @@
 
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DocumentUploader } from "@/components/DocumentUploader";
-import { RobbingRequest } from '@/types';
+import { RobbingRequest, UserRole } from '@/types';
 import { useRobbing } from '@/context/RobbingContext';
 
 interface SLabelSubmissionDrawerProps {
@@ -46,7 +45,7 @@ export function SLabelSubmissionDrawer({ isOpen, onClose, request }: SLabelSubmi
           status: request.status,
           timestamp: new Date().toISOString(),
           user: 'Lisa Wong', // This would be currentUser.name in a real app
-          role: 'Material Store',
+          role: 'Material Store' as UserRole,
           comments: `S Label submitted. Reference: ${referenceNumber}. Component marked as Serviceable. ${notes ? `Notes: ${notes}` : ''}`
         }
       ]
