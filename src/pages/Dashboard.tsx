@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -79,6 +80,7 @@ export default function Dashboard() {
   const handleActionSelect = (request: RobbingRequest, action: string) => {
     setActiveRequest(request);
     
+    // Map actions to their corresponding drawer components
     if (action === 'Submit SDS') {
       setShowSDSDrawer(true);
     } else if (action === 'Submit Acceptance Report') {
