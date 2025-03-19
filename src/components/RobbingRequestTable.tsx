@@ -5,7 +5,13 @@ import { StatusBadge } from './StatusBadge';
 import { ActionButton } from './ActionButton';
 import { formatDate } from '../utils/formatters';
 import { getPriorityBadgeClass } from '../utils/formatters';
-import { ChevronDown, ChevronUp, Search, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, X, ChevronRight } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface RobbingRequestTableProps {
   requests: RobbingRequest[];
@@ -15,6 +21,7 @@ interface RobbingRequestTableProps {
   sortField: keyof RobbingRequest | null;
   sortDirection: 'asc' | 'desc';
   onSort: (field: keyof RobbingRequest) => void;
+  groupBy?: 'none' | 'donorAircraft' | 'recipientAircraft' | 'component';
 }
 
 export function RobbingRequestTable({
@@ -24,7 +31,8 @@ export function RobbingRequestTable({
   onActionSelect,
   sortField,
   sortDirection,
-  onSort
+  onSort,
+  groupBy = 'none'
 }: RobbingRequestTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -74,6 +82,119 @@ export function RobbingRequestTable({
     );
   };
   
+  const groupedRequests = useMemo(() => {
+    if (groupBy === 'none') return { 'All Requests': filteredRequests };
+    
+    return filteredRequests.reduce((acc, request) => {
+      let key = '';
+      
+      if (groupBy === 'donorAircraft') {
+        key = request.donorAircraft;
+      } else if (groupBy === 'recipientAircraft') {
+        key = request.recipientAircraft;
+      } else if (groupBy === 'component') {
+        key = `${request.component.description} (${request.component.partNumber})`;
+      }
+      
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      
+      acc[key].push(request);
+      return acc;
+    }, {} as Record<string, RobbingRequest[]>);
+  }, [filteredRequests, groupBy]);
+  
+  const renderTableContent = (requests: RobbingRequest[]) => (
+    <table className="data-table">
+      <thead>
+        <tr>
+          {columns.map((column) => (
+            <th 
+              key={column.id}
+              className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
+              onClick={() => column.sortable && handleSort(column.id)}
+            >
+              <div className="flex items-center space-x-1">
+                <span>{column.label}</span>
+                {column.sortable && getSortIcon(column.id)}
+              </div>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      
+      <tbody>
+        {requests.length === 0 ? (
+          <tr>
+            <td colSpan={columns.length} className="text-center py-8 text-gray-500">
+              No requests found
+            </td>
+          </tr>
+        ) : (
+          requests.map((request) => (
+            <tr 
+              key={request.requestId}
+              className="cursor-pointer hover:bg-gray-50"
+              onClick={() => onRequestSelect(request)}
+            >
+              <td>{request.requestId}</td>
+              <td>
+                <StatusBadge status={request.status} />
+              </td>
+              <td>{request.donorAircraft}</td>
+              <td>{request.recipientAircraft}</td>
+              <td>
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-900">{request.component.description}</span>
+                  <span className="text-xs text-gray-500">
+                    P/N: {request.component.partNumber}, S/N: {request.component.serialNumber}
+                  </span>
+                </div>
+              </td>
+              <td>{formatDate(request.createdDate)}</td>
+              <td>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getPriorityBadgeClass(request.priority)}`}>
+                  {request.priority}
+                </span>
+              </td>
+              <td className="text-right">
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ActionButton
+                    request={request}
+                    onAction={(action) => onActionSelect(request, action as RobbingStatus)}
+                    variant="outline"
+                    size="sm"
+                  />
+                </div>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  );
+  
+  const renderGroupedTable = () => (
+    <Accordion type="multiple" defaultValue={Object.keys(groupedRequests)}>
+      {Object.entries(groupedRequests).map(([group, groupRequests]) => (
+        <AccordionItem key={group} value={group}>
+          <AccordionTrigger className="hover:no-underline px-4 py-3 bg-gray-100 border-b">
+            <div className="flex items-center justify-between w-full">
+              <div className="font-medium">{group}</div>
+              <div className="text-sm text-gray-500">{groupRequests.length} requests</div>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-0 pb-0">
+            <div className="overflow-x-auto">
+              {renderTableContent(groupRequests)}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  );
+  
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden">
       <div className="p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -102,83 +223,20 @@ export function RobbingRequestTable({
       </div>
       
       <div className="overflow-x-auto">
-        <table className="data-table">
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th 
-                  key={column.id}
-                  className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
-                  onClick={() => column.sortable && handleSort(column.id)}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>{column.label}</span>
-                    {column.sortable && getSortIcon(column.id)}
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          
-          <tbody>
-            {loading ? (
-              [...Array(5)].map((_, index) => (
-                <tr key={index} className="animate-pulse">
-                  {columns.map((column) => (
-                    <td key={column.id}>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : filteredRequests.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="text-center py-8 text-gray-500">
-                  No requests found
-                </td>
-              </tr>
-            ) : (
-              filteredRequests.map((request) => (
-                <tr 
-                  key={request.requestId}
-                  className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => onRequestSelect(request)}
-                >
-                  <td>{request.requestId}</td>
-                  <td>
-                    <StatusBadge status={request.status} />
-                  </td>
-                  <td>{request.donorAircraft}</td>
-                  <td>{request.recipientAircraft}</td>
-                  <td>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-gray-900">{request.component.description}</span>
-                      <span className="text-xs text-gray-500">
-                        P/N: {request.component.partNumber}, S/N: {request.component.serialNumber}
-                      </span>
-                    </div>
-                  </td>
-                  <td>{formatDate(request.createdDate)}</td>
-                  <td>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getPriorityBadgeClass(request.priority)}`}>
-                      {request.priority}
-                    </span>
-                  </td>
-                  <td className="text-right">
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <ActionButton
-                        request={request}
-                        onAction={(action) => onActionSelect(request, action as RobbingStatus)}
-                        variant="outline"
-                        size="sm"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        {loading ? (
+          <div className="p-4">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="animate-pulse mb-4">
+                <div className="h-12 bg-gray-200 rounded w-full mb-4"></div>
+                <div className="h-16 bg-gray-100 rounded w-full"></div>
+              </div>
+            ))}
+          </div>
+        ) : groupBy === 'none' ? (
+          renderTableContent(filteredRequests)
+        ) : (
+          renderGroupedTable()
+        )}
       </div>
       
       <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
