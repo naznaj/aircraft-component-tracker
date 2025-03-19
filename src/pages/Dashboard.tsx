@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { RobbingRequest, RobbingStatus } from '../types';
 import { Navbar } from '../components/Navbar';
@@ -227,7 +226,7 @@ export default function Dashboard() {
       <SDSSubmissionDrawer
         isOpen={showSDSDrawer}
         onClose={handleSDSDrawerClose}
-        request={sdsRequest || selectedRequest}
+        request={sdsRequest}
       />
     </div>
   );
