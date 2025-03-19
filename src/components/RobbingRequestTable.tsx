@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { RobbingRequest, TableColumn, RobbingStatus, ComponentStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
@@ -20,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface RobbingRequestTableProps {
   requests: RobbingRequest[];
@@ -148,7 +148,7 @@ export function RobbingRequestTable({
   const renderTableContent = (requests: RobbingRequest[]) => (
     <div className="overflow-x-auto relative">
       <Table className="w-full">
-        <TableHeader className="sticky top-0 z-10 bg-secondary border-b">
+        <TableHeader className="sticky-header">
           <TableRow>
             {columns.map((column) => (
               <TableHead 
@@ -269,7 +269,7 @@ export function RobbingRequestTable({
         </div>
       </div>
       
-      <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
+      <ScrollArea className="overflow-auto max-h-[calc(100vh-300px)]">
         {loading ? (
           <div className="p-4">
             {[...Array(5)].map((_, index) => (
@@ -284,7 +284,7 @@ export function RobbingRequestTable({
         ) : (
           renderGroupedTable()
         )}
-      </div>
+      </ScrollArea>
       
       <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
         <div className="flex items-center justify-between">
