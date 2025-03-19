@@ -222,9 +222,9 @@ export default function Dashboard() {
         <RequestForm onClose={handleFormClose} />
       )}
       
-      {showNormalizationForm && (
+      {showNormalizationForm && activeRequest && (
         <NormalizationPlanForm 
-          request={activeRequest || selectedRequest!} 
+          request={activeRequest} 
           onClose={handleFormClose} 
         />
       )}
