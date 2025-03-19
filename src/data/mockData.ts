@@ -71,7 +71,7 @@ const generateRandomDate = (start: Date, end: Date): string => {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
 };
 
-const generateStatusHistory = (status: RobbingStatus, createdDate: string): any[] => {
+const generateStatusHistory = (status: RobbingStatus, createdDate: string, hasValidCofA: boolean): any[] => {
   const startDate = new Date(createdDate);
   const history = [
     {
@@ -82,19 +82,35 @@ const generateStatusHistory = (status: RobbingStatus, createdDate: string): any[
     }
   ];
   
-  const possibleStatuses: RobbingStatus[] = [
-    'Initiated',
-    'Pending SDS',
-    'Awaiting FTAM Approval',
-    'Pending AR',
-    'Pending Removal from Donor',
-    'Removed from Donor',
-    'Normalization Planned',
-    'Normalized'
-  ];
+  // Define possible status paths based on CofA validity
+  let possibleStatuses: RobbingStatus[];
   
+  if (hasValidCofA) {
+    possibleStatuses = [
+      'Initiated',
+      'Pending SDS',
+      'Pending Removal from Donor',
+      'Removed from Donor',
+      'Normalization Planned',
+      'Normalized'
+    ];
+  } else {
+    possibleStatuses = [
+      'Initiated',
+      'Awaiting FTAM Approval',
+      'Pending SDS',
+      'Pending AR',
+      'Pending Removal from Donor',
+      'Removed from Donor',
+      'Normalization Planned',
+      'Normalized'
+    ];
+  }
+  
+  // Find the index of the current status in the possible statuses
   const statusIndex = possibleStatuses.indexOf(status);
   
+  // Add history entries for each status transition up to the current status
   for (let i = 1; i <= statusIndex; i++) {
     const nextStatus = possibleStatuses[i];
     const date = new Date(startDate);
@@ -154,10 +170,19 @@ export const generateMockRequests = (count: number): RobbingRequest[] => {
   const startDate = new Date(2023, 0, 1); // Jan 1, 2023
   const endDate = new Date(); // Current date
   
-  const statuses: RobbingStatus[] = [
+  const validCofAStatuses: RobbingStatus[] = [
     'Initiated',
     'Pending SDS',
+    'Pending Removal from Donor',
+    'Removed from Donor',
+    'Normalization Planned',
+    'Normalized'
+  ];
+  
+  const invalidCofAStatuses: RobbingStatus[] = [
+    'Initiated',
     'Awaiting FTAM Approval',
+    'Pending SDS',
     'Pending AR',
     'Pending Removal from Donor',
     'Removed from Donor',
@@ -172,9 +197,15 @@ export const generateMockRequests = (count: number): RobbingRequest[] => {
   ];
   
   for (let i = 0; i < count; i++) {
+    // Determine if this request has a valid Certificate of Airworthiness
+    const hasValidCofA = Math.random() > 0.4; // 60% chance of having valid CofA
+    
+    // Select appropriate status pool based on CofA validity
+    const statuses = hasValidCofA ? validCofAStatuses : invalidCofAStatuses;
+    
     const status = statuses[Math.floor(Math.random() * statuses.length)];
     const createdDate = generateRandomDate(startDate, endDate);
-    const statusHistory = generateStatusHistory(status, createdDate);
+    const statusHistory = generateStatusHistory(status, createdDate, hasValidCofA);
     
     const donorIndex = Math.floor(Math.random() * aircraftRegs.length);
     let recipientIndex;
@@ -192,7 +223,7 @@ export const generateMockRequests = (count: number): RobbingRequest[] => {
       requesterName: 'John Smith',
       requesterDepartment: 'CAMO-Planning',
       donorAircraft: aircraftRegs[donorIndex],
-      donorHasValidCofA: Math.random() > 0.3,
+      donorHasValidCofA: hasValidCofA,
       recipientAircraft: aircraftRegs[recipientIndex],
       reason: Math.random() > 0.7 ? 'AOG at Jakarta' : Math.random() > 0.5 ? 'Scheduled maintenance' : 'Component failure',
       priority: Math.random() > 0.7 ? 'High' : Math.random() > 0.4 ? 'Medium' : 'Low',
@@ -201,7 +232,9 @@ export const generateMockRequests = (count: number): RobbingRequest[] => {
       documentation: {
         sdsReference: status === 'Initiated' ? '' : `SDS-${new Date().getFullYear()}-${1000 + i}`,
         sdsDocument: null,
-        acceptanceReportReference: status === 'Pending AR' || status === 'Initiated' ? '' : `AR-${new Date().getFullYear()}-${500 + i}`,
+        acceptanceReportReference: status === 'Pending AR' || status === 'Initiated' || 
+                                 (hasValidCofA && ['Awaiting FTAM Approval', 'Pending SDS'].includes(status)) ? 
+                                 '' : `AR-${new Date().getFullYear()}-${500 + i}`,
         acceptanceReportDocument: null,
         caamForm1Reference: status === 'Removed from Donor' || status === 'Normalization Planned' || status === 'Normalized' ? `CAAM-${1000 + i}` : '',
         caamForm1Document: null,
