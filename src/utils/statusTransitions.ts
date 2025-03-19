@@ -1,3 +1,4 @@
+
 import { RobbingStatus, UserRole } from '../types';
 
 interface StatusTransition {
@@ -37,12 +38,8 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
         label: 'Submit SDS',
         description: 'Submit Spares Declaration Statement for this request',
         authorizedRoles: ['CAMO Planning', 'Admin']
-      },
-      {
-        nextStatus: 'Rejected',
-        label: 'Reject Request',
-        authorizedRoles: ['FTAM', 'Admin']
       }
+      // Removed FTAM's ability to reject request
     ],
     description: 'Waiting for Spares Declaration Statement to be submitted by CAMO Planning.'
   },
@@ -67,12 +64,8 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
         nextStatus: 'Pending Removal from Donor',
         label: 'Submit Acceptance Report',
         authorizedRoles: ['CAMO Technical Services', 'Admin']
-      },
-      {
-        nextStatus: 'Rejected',
-        label: 'Reject Request',
-        authorizedRoles: ['CAMO Technical Services', 'Admin']
       }
+      // Removed CAMO Technical Services' ability to reject request
     ],
     description: 'Waiting for Acceptance Report to be submitted by CAMO Technical Services.'
   },
@@ -82,12 +75,8 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
         nextStatus: 'Removed from Donor',
         label: 'Mark as Removed',
         authorizedRoles: ['AMO 145', 'Admin']
-      },
-      {
-        nextStatus: 'Rejected',
-        label: 'Reject Request',
-        authorizedRoles: ['AMO 145', 'Admin']
       }
+      // Removed AMO 145's ability to reject request
     ],
     description: 'Component is pending physical removal from donor aircraft by AMO 145.'
   },
