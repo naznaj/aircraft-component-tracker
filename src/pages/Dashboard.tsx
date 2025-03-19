@@ -94,7 +94,7 @@ export default function Dashboard() {
   };
   
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
-  const showSDSButton = currentUser?.role === 'FTAM' || currentUser?.role === 'Admin';
+  const showSDSButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
   
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,4 +1,3 @@
-
 import { RobbingStatus, UserRole } from '../types';
 
 interface StatusTransition {
@@ -40,7 +39,7 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
         nextStatus: 'Pending AR',
         label: 'Submit SDS',
         description: 'Submit Spares Declaration Statement for this request',
-        authorizedRoles: ['FTAM', 'Admin']
+        authorizedRoles: ['CAMO Planning', 'Admin']
       },
       {
         nextStatus: 'Rejected',
@@ -48,7 +47,7 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
         authorizedRoles: ['FTAM', 'Admin']
       }
     ],
-    description: 'Waiting for Spares Declaration Statement to be submitted by FTAM.'
+    description: 'Waiting for Spares Declaration Statement to be submitted by CAMO Planning.'
   },
   'Awaiting FTAM Approval': {
     transitions: [
