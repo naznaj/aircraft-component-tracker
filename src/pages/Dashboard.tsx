@@ -7,9 +7,10 @@ import { RobbingRequestTable } from '../components/RobbingRequestTable';
 import { DetailPanel } from '../components/DetailPanel';
 import { RequestForm } from '../components/forms/RequestForm';
 import { NormalizationPlanForm } from '../components/forms/NormalizationPlanForm';
+import { SDSSubmissionDrawer } from '../components/forms/SDSSubmissionDrawer';
 import { useRobbing } from '../context/RobbingContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Filter, ChevronDown, X } from 'lucide-react';
+import { Plus, Filter, ChevronDown, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
   DropdownMenu,
@@ -40,7 +41,9 @@ export default function Dashboard() {
   const { currentUser } = useAuth();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showNormalizationForm, setShowNormalizationForm] = useState(false);
+  const [showSDSDrawer, setShowSDSDrawer] = useState(false);
   const [normalizationRequest, setNormalizationRequest] = useState<RobbingRequest | null>(null);
+  const [sdsRequest, setSdsRequest] = useState<RobbingRequest | null>(null);
   const [groupBy, setGroupBy] = useState<'none' | 'donorAircraft' | 'recipientAircraft' | 'component'>('none');
   
   const handleSort = (field: keyof RobbingRequest) => {
@@ -71,6 +74,9 @@ export default function Dashboard() {
     if (action === 'Plan Normalization') {
       setNormalizationRequest(request);
       setShowNormalizationForm(true);
+    } else if (action === 'Submit SDS') {
+      setSdsRequest(request);
+      setShowSDSDrawer(true);
     } else {
       changeRequestStatus(request.requestId, action as RobbingStatus);
       toast.success(`Request status updated to ${action}`);
@@ -82,7 +88,13 @@ export default function Dashboard() {
     setNormalizationRequest(null);
   };
   
+  const handleSDSDrawerClose = () => {
+    setShowSDSDrawer(false);
+    setSdsRequest(null);
+  };
+  
   const showCreateButton = currentUser?.role === 'CAMO Planning' || currentUser?.role === 'Admin';
+  const showSDSButton = currentUser?.role === 'FTAM' || currentUser?.role === 'Admin';
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,6 +163,17 @@ export default function Dashboard() {
                 </DropdownMenuContent>
               </DropdownMenu>
               
+              {showSDSButton && (
+                <Button
+                  onClick={() => setShowSDSDrawer(true)}
+                  variant="secondary"
+                  className="inline-flex items-center"
+                >
+                  <FileText className="mr-2 h-5 w-5" aria-hidden="true" />
+                  Submit SDS
+                </Button>
+              )}
+              
               {showCreateButton && (
                 <Button
                   onClick={() => setShowCreateForm(true)}
@@ -200,6 +223,12 @@ export default function Dashboard() {
           onClose={handleNormalizationPlanComplete} 
         />
       )}
+      
+      <SDSSubmissionDrawer
+        isOpen={showSDSDrawer}
+        onClose={handleSDSDrawerClose}
+        request={sdsRequest || selectedRequest}
+      />
     </div>
   );
 }

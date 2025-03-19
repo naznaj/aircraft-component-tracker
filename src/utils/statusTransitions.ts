@@ -3,148 +3,144 @@ import { RobbingStatus, UserRole } from '../types';
 
 interface StatusTransition {
   nextStatus: RobbingStatus;
-  authorizedRoles: UserRole[];
   label: string;
   description?: string;
+  authorizedRoles: UserRole[];
 }
 
-interface StatusConfig {
-  status: RobbingStatus;
+interface StatusTransitionMap {
   transitions: StatusTransition[];
   description: string;
-  color: string;
 }
 
-const statusConfigurations: Record<RobbingStatus, StatusConfig> = {
+const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
   'Initiated': {
-    status: 'Initiated',
-    description: 'Request has been created',
-    color: 'bg-gray-200 text-gray-800',
     transitions: [
       {
         nextStatus: 'Pending SDS',
-        authorizedRoles: ['System', 'Admin', 'CAMO Planning'],
         label: 'Move to Pending SDS',
-        description: 'Donor aircraft has valid C of A'
+        authorizedRoles: ['CAMO Planning', 'Admin']
       },
       {
         nextStatus: 'Awaiting FTAM Approval',
-        authorizedRoles: ['System', 'Admin', 'CAMO Planning'],
         label: 'Request FTAM Approval',
-        description: 'Donor aircraft does not have valid C of A'
-      }
-    ]
-  },
-  'Awaiting FTAM Approval': {
-    status: 'Awaiting FTAM Approval',
-    description: 'Waiting for FTAM to approve request',
-    color: 'bg-amber-100 text-amber-800',
-    transitions: [
-      {
-        nextStatus: 'Pending AR',
-        authorizedRoles: ['FTAM', 'Admin'],
-        label: 'Approve Request',
-        description: 'Approve request and require Acceptance Report'
+        authorizedRoles: ['CAMO Planning', 'Admin']
       },
       {
         nextStatus: 'Rejected',
-        authorizedRoles: ['FTAM', 'Admin'],
         label: 'Reject Request',
-        description: 'Reject the request'
+        authorizedRoles: ['CAMO Planning', 'Admin']
       }
-    ]
+    ],
+    description: 'Request has been initiated and may proceed to next steps based on aircraft C of A status.'
   },
-  'Pending AR': {
-    status: 'Pending AR',
-    description: 'Waiting for Acceptance Report',
-    color: 'bg-red-100 text-red-800',
+  'Pending SDS': {
+    transitions: [
+      {
+        nextStatus: 'Pending AR',
+        label: 'Submit SDS',
+        description: 'Submit Spares Declaration Statement for this request',
+        authorizedRoles: ['FTAM', 'Admin']
+      },
+      {
+        nextStatus: 'Rejected',
+        label: 'Reject Request',
+        authorizedRoles: ['FTAM', 'Admin']
+      }
+    ],
+    description: 'Waiting for Spares Declaration Statement to be submitted by FTAM.'
+  },
+  'Awaiting FTAM Approval': {
     transitions: [
       {
         nextStatus: 'Pending SDS',
-        authorizedRoles: ['CAMO Technical Services', 'Admin'],
-        label: 'Submit AR',
-        description: 'Submit Acceptance Report to proceed'
+        label: 'Approve Request',
+        authorizedRoles: ['FTAM', 'Admin']
+      },
+      {
+        nextStatus: 'Rejected',
+        label: 'Reject Request',
+        authorizedRoles: ['FTAM', 'Admin']
       }
-    ]
+    ],
+    description: 'Waiting for FTAM approval because donor aircraft does not have valid C of A.'
   },
-  'Pending SDS': {
-    status: 'Pending SDS',
-    description: 'Waiting for Spares Declaration Statement',
-    color: 'bg-blue-100 text-blue-800',
+  'Pending AR': {
     transitions: [
       {
         nextStatus: 'Pending Removal from Donor',
-        authorizedRoles: ['CAMO Planning', 'Admin'],
-        label: 'Submit SDS',
-        description: 'Submit Spares Declaration Statement'
+        label: 'Submit Acceptance Report',
+        authorizedRoles: ['CAMO Technical Services', 'Admin']
+      },
+      {
+        nextStatus: 'Rejected',
+        label: 'Reject Request',
+        authorizedRoles: ['CAMO Technical Services', 'Admin']
       }
-    ]
+    ],
+    description: 'Waiting for Acceptance Report to be submitted by CAMO Technical Services.'
   },
   'Pending Removal from Donor': {
-    status: 'Pending Removal from Donor',
-    description: 'Component ready for removal from donor aircraft',
-    color: 'bg-emerald-100 text-emerald-800',
     transitions: [
       {
         nextStatus: 'Removed from Donor',
-        authorizedRoles: ['AMO 145', 'Admin'],
-        label: 'Confirm Removal',
-        description: 'Confirm component has been removed from donor aircraft'
+        label: 'Mark as Removed',
+        authorizedRoles: ['AMO 145', 'Admin']
+      },
+      {
+        nextStatus: 'Rejected',
+        label: 'Reject Request',
+        authorizedRoles: ['AMO 145', 'Admin']
       }
-    ]
+    ],
+    description: 'Component is pending physical removal from donor aircraft by AMO 145.'
   },
   'Removed from Donor': {
-    status: 'Removed from Donor',
-    description: 'Component has been removed from donor aircraft',
-    color: 'bg-indigo-100 text-indigo-800',
     transitions: [
       {
         nextStatus: 'Normalization Planned',
-        authorizedRoles: ['CAMO Planning', 'Admin'],
         label: 'Plan Normalization',
-        description: 'Plan the normalization of the donor aircraft'
+        description: 'Create a plan for normalizing the donor aircraft',
+        authorizedRoles: ['CAMO Planning', 'Admin']
       }
-    ]
+    ],
+    description: 'Component has been physically removed from donor aircraft. Normalization planning is required.'
   },
   'Normalization Planned': {
-    status: 'Normalization Planned',
-    description: 'Normalization of donor aircraft has been planned',
-    color: 'bg-violet-100 text-violet-800',
     transitions: [
       {
         nextStatus: 'Normalized',
-        authorizedRoles: ['CAMO Planning', 'Admin'],
-        label: 'Confirm Normalization',
-        description: 'Confirm donor aircraft has been normalized'
+        label: 'Mark as Normalized',
+        authorizedRoles: ['AMO 145', 'Admin']
       }
-    ]
+    ],
+    description: 'Normalization plan has been created. Waiting for normalization to be completed by AMO 145.'
   },
   'Normalized': {
-    status: 'Normalized',
-    description: 'Donor aircraft has been normalized',
-    color: 'bg-green-100 text-green-800',
-    transitions: []
+    transitions: [],
+    description: 'Donor aircraft has been normalized. This request is complete.'
   },
   'Rejected': {
-    status: 'Rejected',
-    description: 'Request has been rejected',
-    color: 'bg-red-100 text-red-800',
-    transitions: []
+    transitions: [],
+    description: 'This request has been rejected and cannot proceed further.'
   }
 };
 
-export const getStatusTransitions = (status: RobbingStatus): StatusConfig => {
-  return statusConfigurations[status];
-};
+export function getStatusTransitions(currentStatus: RobbingStatus): StatusTransitionMap {
+  return statusTransitionMap[currentStatus];
+}
 
-export const getStatusColor = (status: RobbingStatus): string => {
-  return statusConfigurations[status]?.color || 'bg-gray-200 text-gray-800';
-};
-
-export const getStatusDescription = (status: RobbingStatus): string => {
-  return statusConfigurations[status]?.description || 'Unknown status';
-};
-
-export const getAllStatuses = (): RobbingStatus[] => {
-  return Object.keys(statusConfigurations) as RobbingStatus[];
-};
+export function getAllStatuses(): RobbingStatus[] {
+  // Return statuses in the order of the workflow
+  return [
+    'Initiated',
+    'Awaiting FTAM Approval',
+    'Pending SDS',
+    'Pending AR',
+    'Pending Removal from Donor',
+    'Removed from Donor',
+    'Normalization Planned',
+    'Normalized',
+    'Rejected'
+  ];
+}
