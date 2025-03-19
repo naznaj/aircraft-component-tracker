@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { RobbingRequest, RobbingStatus, UserRole } from '../types';
@@ -52,7 +51,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
   const [sortField, setSortField] = useState<keyof RobbingRequest | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  // Load mock data
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
@@ -61,16 +59,13 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     }, 1000);
   }, []);
 
-  // Update filtered requests when filters or sorts change
   useEffect(() => {
     let filtered = [...requests];
     
-    // Apply status filters
     if (filterStatuses.length > 0) {
       filtered = filtered.filter(request => filterStatuses.includes(request.status));
     }
     
-    // Apply sorting
     if (sortField) {
       filtered.sort((a, b) => {
         const aValue = a[sortField];
@@ -95,7 +90,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     setFilteredRequests(filtered);
   }, [requests, filterStatuses, sortField, sortDirection]);
 
-  // Update status counts
   useEffect(() => {
     const counts = {
       'Initiated': 0,
@@ -156,27 +150,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
       status: 'Initiated',
     };
     
-    // Skip intermediate statuses based on C of A
-    if (fullRequest.donorHasValidCofA) {
-      fullRequest.status = 'Pending SDS';
-      fullRequest.statusHistory.push({
-        status: 'Pending SDS',
-        timestamp: new Date().toISOString(),
-        user: 'System',
-        role: 'System',
-        comments: 'Automatic transition: Donor aircraft has valid C of A'
-      });
-    } else {
-      fullRequest.status = 'Awaiting FTAM Approval';
-      fullRequest.statusHistory.push({
-        status: 'Awaiting FTAM Approval',
-        timestamp: new Date().toISOString(),
-        user: 'System',
-        role: 'System',
-        comments: 'Automatic transition: Donor aircraft does not have valid C of A'
-      });
-    }
-    
     setRequests(prev => [...prev, fullRequest]);
     toast.success(`Request ${requestId} created successfully`);
   };
@@ -209,7 +182,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     
     toast.success(`Request status updated to ${newStatus}`);
     
-    // If we updated the selected request, refresh it
     if (selectedRequest?.requestId === requestId) {
       setSelectedRequest(prev => prev ? {
         ...prev,
@@ -242,7 +214,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
   const canChangeStatus = (request: RobbingRequest, newStatus: RobbingStatus): boolean => {
     if (!currentUser) return false;
     
-    // Get valid transitions from status transitions utility
     const { transitions } = getStatusTransitions(request.status);
     const validTransition = transitions.find(t => t.nextStatus === newStatus);
     
@@ -256,7 +227,6 @@ export function RobbingProvider({ children }: { children: ReactNode }) {
     
     const { transitions } = getStatusTransitions(request.status);
     
-    // Filter transitions by user role
     return transitions
       .filter(t => t.authorizedRoles.includes(currentUser.role))
       .map(t => t.nextStatus);

@@ -17,21 +17,18 @@ const statusTransitionMap: Record<RobbingStatus, StatusTransitionMap> = {
     transitions: [
       {
         nextStatus: 'Pending SDS',
-        label: 'Move to Pending SDS',
+        label: 'C of A is Valid',
+        description: 'Confirm donor aircraft has a valid Certificate of Airworthiness',
         authorizedRoles: ['CAMO Planning', 'Admin']
       },
       {
         nextStatus: 'Awaiting FTAM Approval',
-        label: 'Request FTAM Approval',
-        authorizedRoles: ['CAMO Planning', 'Admin']
-      },
-      {
-        nextStatus: 'Rejected',
-        label: 'Reject Request',
+        label: 'No Valid C of A',
+        description: 'Confirm donor aircraft does not have a valid Certificate of Airworthiness',
         authorizedRoles: ['CAMO Planning', 'Admin']
       }
     ],
-    description: 'Request has been initiated and may proceed to next steps based on aircraft C of A status.'
+    description: 'Request has been initiated and needs C of A validation by CAMO Planning.'
   },
   'Pending SDS': {
     transitions: [
