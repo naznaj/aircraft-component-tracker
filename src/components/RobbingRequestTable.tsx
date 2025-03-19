@@ -156,7 +156,6 @@ export function RobbingRequestTable({
                 key={column.id}
                 className={`${column.align === 'right' ? 'text-right' : ''} ${column.sortable ? 'cursor-pointer' : ''}`}
                 onClick={() => column.sortable && handleSort(column.id)}
-                style={{position: "absolute", top: 0}}
               >
                 <div className="flex items-center space-x-1">
                   <span>{column.label}</span>
