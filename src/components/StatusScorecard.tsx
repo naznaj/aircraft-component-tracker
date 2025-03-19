@@ -45,12 +45,12 @@ export function StatusScorecards({ statusCounts, activeStatuses, onStatusClick }
     onStatusClick(status);
   };
   
-  // Custom ordering of the statuses with "Pending AR" before "Pending SDS"
+  // Custom ordering of the statuses with "Awaiting FTAM Approval" before "Pending AR"
   const orderedStatuses: RobbingStatus[] = [
     'Initiated', 
+    'Awaiting FTAM Approval',
     'Pending AR', 
     'Pending SDS', 
-    'Awaiting FTAM Approval', 
     'Pending Removal from Donor', 
     'Removed from Donor', 
     'Normalization Planned', 
